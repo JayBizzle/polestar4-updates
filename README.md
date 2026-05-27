@@ -15,31 +15,36 @@ dates), rebuilds, commits, and deploys to GitHub Pages.
 | File | Role |
 |------|------|
 | `index.html` | The page. Self-contained (inline CSS/JS, data embedded). Open it directly or host it anywhere. **Generated — don't edit by hand.** |
-| `data.json` | **Source of truth.** The version list, notes, and `first_seen` dates. Edit this. |
+| `data.json` | **Source of truth.** Version list, release notes, and `release_date` per version. Hand-edit to correct a date; the scraper preserves existing dates. |
 | `build.js` | Reads `data.json` → writes `index.html`. |
 | `scrape.js` / `lib/scraper.js` | Scraper CLI + pure parse/merge/validate logic. |
 | `.github/workflows/update.yml` | Daily auto-update workflow. |
 
-## Update the data
+## How updates happen
 
-1. Edit `data.json` (add a new entry to `updates`, set `meta.scraped_on`).
-2. Rebuild:
-   ```bash
-   node build.js
-   ```
-3. Open `index.html` to check, or deploy it.
+The daily GitHub Action (`.github/workflows/update.yml`, 06:00 UTC, plus a manual
+"Run workflow" button) scrapes the UK manual, merges into `data.json`, rebuilds, and
+pushes — which deploys to GitHub Pages. On a new version it opens a `🔔` issue; if the
+scrape looks broken (no versions, empty notes, or a sudden version-count collapse) it
+opens a `⚠️` issue and changes nothing.
+
+To run or correct things by hand:
+
+```bash
+npm install         # once
+npm test            # run the test suite
+node scrape.js      # fetch the UK manual and merge into data.json
+node build.js       # regenerate index.html from data.json
+```
+
+To fix a date manually, edit its `release_date` in `data.json` and run `node build.js`.
+The scraper never overwrites existing dates — it only assigns one to a brand-new version.
 
 ## How the numbers work
 
 - **Dates are when each update was first observed online, not Polestar's official
   release dates** — Polestar publishes none. The page says so in the footer.
-- The 11 versions sharing `2025-09-04` were backfilled together on a single date.
-  They're flagged, shown without a day-gap, and **excluded from cadence math**.
-- Average interval / predicted next / overdue are computed live in the browser from
-  the gaps between distinct, non-backfill dates. "Days since last" updates as real
-  time passes.
-
-## Hosting
-
-No build server needed. `index.html` is fully static — push to GitHub Pages, drop in
-an S3 bucket, drag into Netlify, or just open the file.
+- Average interval, predicted-next, and the overdue/upcoming badge are computed live
+  in the browser from the gaps between dated versions; "days since last" ticks in real
+  time.
+- The oldest versions with no known date are listed but excluded from the cadence maths.
