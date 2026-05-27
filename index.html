@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polestar 4 Software Updates — Unofficial Tracker</title>
+<meta name="description" content="Tracking Polestar 4 software updates: release notes, time between releases, average cadence, and the predicted next update.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f3f1; --card:#ffffff; --ink:#141414; --muted:#6c6c6a;
+    --line:#e5e5e1; --line-strong:#d8d8d3;
+    --gold:#b08d4f; --gold-soft:#f0e7d6;
+    --danger:#b23b3b; --danger-soft:#f6e4e2;
+    --ok:#3c7d57; --ok-soft:#e2efe7;
+    --radius:14px;
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--font); background:var(--bg); color:var(--ink);
+    line-height:1.55; font-weight:400; -webkit-font-smoothing:antialiased;
+    padding:clamp(20px,5vw,56px) 20px 64px;
+  }
+  .wrap{max-width:860px;margin:0 auto}
+  a{color:inherit}
+
+  /* Header */
+  header.site{margin-bottom:40px}
+  .eyebrow{
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;margin-bottom:14px;
+  }
+  h1{font-size:clamp(30px,6vw,48px);font-weight:300;letter-spacing:-.02em;line-height:1.05}
+  h1 b{font-weight:600}
+  .lede{margin-top:14px;color:var(--muted);font-size:15px;max-width:60ch}
+  .lede a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  .lede a:hover{border-color:var(--ink)}
+
+  /* Prediction banner */
+  .banner{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:clamp(22px,4vw,34px);margin:36px 0 16px;
+    display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;
+  }
+  .banner .label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .banner .date{font-size:clamp(26px,5vw,40px);font-weight:300;letter-spacing:-.01em}
+  .banner .sub{color:var(--muted);font-size:14px;margin-top:10px;max-width:46ch}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;border-radius:100px;
+    padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.02em;white-space:nowrap;
+  }
+  .badge .dot{width:8px;height:8px;border-radius:50%}
+  .badge.overdue{background:var(--danger-soft);color:var(--danger)}
+  .badge.overdue .dot{background:var(--danger)}
+  .badge.upcoming{background:var(--ok-soft);color:var(--ok)}
+  .badge.upcoming .dot{background:var(--ok)}
+
+  /* Stat grid */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 18px}
+  .stat .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .stat .v{font-size:30px;font-weight:300;letter-spacing:-.01em;line-height:1}
+  .stat .v small{font-size:14px;color:var(--muted);font-weight:400}
+
+  /* Section heading */
+  .sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 22px;gap:12px}
+  .sec-h h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--ink)}
+  .sec-h .note{font-size:12px;color:var(--muted)}
+
+  /* Timeline */
+  .timeline{position:relative;margin-left:7px;padding-left:28px;border-left:1px solid var(--line-strong)}
+  .entry{position:relative;padding-bottom:26px}
+  .entry:last-child{padding-bottom:0}
+  .entry::before{
+    content:"";position:absolute;left:-35px;top:6px;width:13px;height:13px;border-radius:50%;
+    background:var(--card);border:2px solid var(--gold);
+  }
+  .entry.nodate::before{border-color:var(--line-strong)}
+  details{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  summary{
+    list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  summary::-webkit-details-marker{display:none}
+  .ver{font-size:17px;font-weight:600;letter-spacing:-.01em}
+  .meta-row{display:flex;align-items:center;gap:14px;margin-left:auto;color:var(--muted);font-size:13px;flex-wrap:wrap}
+  .gap{color:var(--gold);font-weight:600}
+  .gap.zero{color:var(--muted);font-weight:400}
+  .date{white-space:nowrap}
+  .date.est{color:var(--muted)}
+  .date.unknown{color:var(--muted);font-style:italic}
+  .chev{transition:transform .2s ease;color:var(--muted);font-size:12px}
+  details[open] .chev{transform:rotate(180deg)}
+  .notes{padding:0 18px 18px;border-top:1px solid var(--line)}
+  .notes ul{list-style:none;margin-top:14px}
+  .notes li{position:relative;padding-left:18px;margin-bottom:9px;font-size:14.5px;color:#2c2c2a}
+  .notes li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+  /* Footer */
+  footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  footer p{margin-bottom:8px;max-width:70ch}
+  footer a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  footer a:hover{border-color:var(--ink)}
+
+  @media(max-width:680px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .banner{flex-direction:column;align-items:flex-start}
+    .meta-row{width:100%;margin-left:0;margin-top:4px}
+  }
+  @media(max-width:440px){
+    .stat{padding:16px 14px}
+    .stat .v{font-size:26px}
+    summary{padding:14px}
+    .notes{padding:0 14px 14px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="eyebrow">Unofficial tracker</div>
+    <h1>Polestar 4 <b>Software Updates</b></h1>
+    <p class="lede">When the next over-the-air update is likely to land, how often they arrive, and what each one changed. Version notes from
+      <a href="https://www.polestar.com/us/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">Polestar's manual</a>.</p>
+  </header>
+
+  <section class="banner" id="banner"></section>
+  <section class="stats" id="stats"></section>
+
+  <div class="sec-h">
+    <h2>Release timeline</h2>
+    <span class="note" id="timeline-note"></span>
+  </div>
+  <div id="timeline-root"></div>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+const DATA = {"meta":{"title":"Polestar 4 Software Updates","authoritative_source":"https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/","timing_note":"Release dates are approximate (“thereabouts”), not exact day-of-release. A few recent versions use an estimated date (marked ≈) and a few older ones have no known date.","scraped_on":"2026-05-27","total_versions":17,"page_version_count":17},"updates":[{"version":"P4.2.11","release_date":"2026-03-24","date_estimated":false,"notes":["This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."]},{"version":"P4.2.10","release_date":"2026-02-24","date_estimated":false,"notes":["Improvements to battery pre-conditioning, including the system now acting more dynamically, allowing the conditioning to start earlier and reach a higher temperature improving overall charging performance","To start the pre-conditioning it is required to set a DC fast charger (>70 kW) as the destination in the built-in Google Maps app and ensure the estimated state of charge when arriving is kept above 7%","On long trips with multiple stops, ensure that the charging stop is prioritized and your first stop in the route guidance","Improvements to the climate system, including a bug fix when the climate system was sporadically blowing cold air","Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on parallel roads"]},{"version":"P4.2.9","release_date":"2026-02-02","date_estimated":false,"notes":["Plug & Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug & Charge supported stations without the need for manual payment, using the secure ISO 15118 standard for communication between the car and charger. Simply find charging stations that support Plug & Charge through Google Maps in the centre display or in the Polestar Charge app","Activation instructions of Plug & Charge are available in the Polestar App and in the car’s centre display in the Charging menu","Audible confirmation when locking the vehicle is introduced. After installation the function is set to ‘off’ as a default and can be turned on by users in the exterior settings for locking","Rear auto brake for static objects during parking manoeuvres is introduced. A button is added in the camera view to disable it, and the function will remain disabled until re-activated by user","Lane change assist now saves the preferred setting between driving cycles","Previously, it was default off each driving cycle","Automatic resume of stop & go when using Pilot assist or Adaptive Cruise Control now cancels the assisted driving after more than 10 seconds of being at a complete standstill","Automatic headlight functionality now ensures the headlights turn off automatically when the vehicle transitions from active to inactive mode when the driver’s door is opened","Previously, the headlights remained turned on until the car was locked or the home safety lights cycle was completed (if the setting was activated)","The headlights will now turn on again to complete the home safety lights cycle if the setting is activated","Improvements to the infotainment system including translation corrections and minor UX/UI updates such as digital key for Apple watch will now be displayed with a watch symbol in the shared keys list in-car","Previously, a shared key for Apple Watch was displayed with a phone symbol","Improvement to the Google maps energy estimation to reflect a more realistic estimated state of charge at arrival using dynamic consumption data","Previously, the estimation was calculated based on static consumption data","Improvement to Apple CarPlay including a bug fix for when Siri was interrupted while replying to text messages","Improvements to the climate settings including a bug fix for when it wasn’t possible to adjust the air vents in the climate settings","Improvements to syncing settings between the Polestar app and the car","Improvements to heating of the area for forward looking cameras in the windscreen, including heating of this area to start, if needed, also when pre-conditioning the car","The heating starts when the ambient temperature is below 1°C/33°F","Improvements to the alarm internal movement sensor, including improved sensitivity","Bug fix for when the steering wheel heating didn’t start in colder climates with the automatic steering wheel heat setting activated","The steering wheel heat starts when the ambient temperature is below 10°C/50°F","Bug fix for when the steering wheel could create sporadic vibrations in low-speed manoeuvres"]},{"version":"P4.2.8","release_date":"2025-12-11","date_estimated":false,"notes":["The content of this software update is identical to P4.2.7.","Compatibility update"]},{"version":"P4.2.7","release_date":"2025-10-27","date_estimated":false,"notes":["Bug fix for issue where old text messages were reiterated when phone is connecting to Bluetooth","Centre display stability improvements covering translation corrections","Video streaming services improvements including mitigation of video signals causing sound to play without picture","Seat heating improvement to increase the overall seat heating temperature by 2 degrees","Animal mode now automatically turns off headlights when activated. The headlights will return to chosen setting once animal mode is turned off","Set climate timers will now start 30 minutes prior set departure time","Previously the timer started 15 minutes prior set time. Should the user not enter the vehicle at set departure time, the climate will continue to run for an additional 10 minutes before turning off","Pre-conditioning the cabin climate via direct start in the Polestar app will now run for 30 minutes before switching off","Previously, the climate ran for 15 minutes after direct start","Dashcam settings are now saved to driver profiles","Your preferred settings will now be saved to your driver profile, allowing the user to accept the privacy preference at first time of use only. All settings, including automatic emergency recording, will now remain between drive cycles","The guest profile will always restore to default settings between drive cycles as well as require an acceptance of the privacy preference at every use","While parked, if the driver’s door is left open and no driver is detected in the seat, any music currently playing will pause","Previously, music continued to play until the vehicle was locked","Improved steering interactions in low speed when using Pilot assist","Improved braking interactions when using Adaptive Cruise Control (ACC) and Pilot assist","Adjustment of set target speed value by short press is changed to 1 mph per press. Previously a short press would adjust the target speed by 5 mph. This has now been changed to be adjusted by a long press"]},{"version":"P4.2.6","release_date":"2025-09-01","date_estimated":false,"notes":["Bug fix for issue where Adaptive Cruise Control would deactivate in trailer mode.","Improvement to issue with steering wheel vibrations occurring whilst driving at low speeds."]},{"version":"P4.2.5","release_date":"2025-07-09","date_estimated":false,"notes":["Center display stability improvements","Edit button now added to the Favorites app and Shortcuts widget","Previously, the widget could only be edited by holding and pressing the app or shortcut you wish to edit. An edit button has now been added to the top right corner of the widget.","Speed limit warning turned off. Function now includes a dismiss button to allow the driver to actively dismiss the notification","A/C climate calibration improvements","Parking sensors are now deactivated when Car Wash Mode is active","General stability improvements","Pilot Assist now uses a new AI-based method for lateral control, following the drive path within the lane instead of just the center. The steering control will now handle road curves in a more natural manner.","This does not reduce the driver's responsibility to operate the car as safely as possible.","Lane Keeping Aid now improved to allow setting for steering wheel vibrations only","Previously the Lane keeping aid system would only allow for an ON or OFF setting, the ON setting would allow both steering interventions and vibrations. You can now select if you want ‘only vibrations’ or ‘vibrations and steering interventions’ when selecting ON. Please note that the steering interventions will still be active for solid road lines and edges.","Pilot Assist now works up to 150 km/h. If speed exceeds 150 km/h while using Pilot Assist, lateral control will automatically resume when speed drops below 150 km/h again","Adaptive Cruise Control (ACC) now works up to 180 km/h","Tuning improvements to ACC and Pilot Assist to provide a smoother acceleration and braking experience","Pilot Assist improved to avoid unnecessary brake interventions while driving.","“Driver Not Detected” warnings system improved to reduce amount of false messages"]},{"version":"P4.2.4","release_date":"2025-06-09","date_estimated":false,"notes":["Launch of dozen new apps through Google Built-in, all which can be enjoyed while the vehicle is parked. Check out the full list of apps on the Google Play Store.","Driver’s profile will now be selected when opening the driver’s door, even in the scenario where the passenger door has already been unlocked and opened by another key. The driver’s profile needs to have a key already connected for this to function.","Previously the vehicle would always default to whichever profile’s key opened the car first, not to the driver entering the car.","More functions have now been added to the favorite's shortcut","General stability improvements"]},{"version":"P4.2.3","release_date":"2025-05-23","date_estimated":false,"notes":["Enabling Digital Key functionality for Apple devices for all markets.","To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is being released for respective markets at a later date.","Charging speed now shown as kW in driver display.","Automatic climate mode improved to avoid issue with air conditioning not cooling car sufficiently.","Centre display stability improvements to prevent unresponsive behaviour or screen resetting.","Apple CarPlay stability improvements to avoid echo during phone calls in car, as well as connectivity issues between car and phone device.","Scheduled charging improved resolving issue with timer not setting or charging not starting at set time.","Digital key improved to prevent issue with centre display settings not correctly showing successfully paired and shared digital keys.","Favourite shortcuts in centre display improved to prevent issue with loss of saved shortcuts.","Software release notes now available in centre display.","Journey Log app enabled. The Journey Log app can be downloaded from Google Play Store and helps drivers automatically track and record trips.","Dashcam app now available (requires micro-SD card).","The car will not allow the video stream to be active while driving, however the functions “Record video” and “Take photo” can still be utilized while driving.","Seat heating stability improvement.","Charge limit stability improvement to issue with limit unexpectedly changing to 50%.","Adaptive Cruise Control is now activated by pressing the steering wheel button once. For cars with pilot pack, Adaptive Cruise Control will be activated with one press after activating Pilot Assist. You can toggle between the two functions by pressing the button once.","Adaptive Cruise Control was previously activated by quickly pressing the Pilot Assist button twice in succession. This has now been removed.","Pilot Assist & Adaptive Cruise Control set to adapt to the speed limit function reinstated."]},{"version":"P4.2.2","release_date":"2025-03-26","date_estimated":false,"notes":["Performance of the climate system improved reducing likelihood of condensation on the windows and improve air flow","Battery pre-conditioning improvements: minimum estimated state-of-charge at arrival now reduced from 22% to 7%. Battery pre-conditioning requires a destination to a DC charger to be set.","Improvements when toggling between Adaptive Cruise Control and Pilot Assist functions. Your set speed now remains when switching between ACC and PA instead of using the current speed limit as a target speed.","Introduction of a driver display message alerting you when the driver alert system is temporarily unavailable. This may occur if, for example, you cover parts of your face during driving, and the system cannot detect you.","Climate system improved to avoid issue with automatic steering wheel heating not activating at low temperatures.","General stability improvements."]},{"version":"P4.2.1","release_date":"2025-02-06","date_estimated":false,"notes":["Enabling Digital Key functionality for Apple devices; requires future activation email (Only for European vehicles)","Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only)","Introduction of battery preconditioning, applicable when destination to a DC charger is set and the estimated state-of-charge at arrival is above 22%","Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on the steering wheel control","Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control","Adaptive Cruise Control now available with trailer mode","One pedal drive available in three levels (standard, low, off) via steering wheel controls","One pedal drive setting now saved to corresponding driver profiles","Enabler for future Dashcam in-car app (will require micro-SD card).","Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed"]},{"version":"4.1.11","release_date":"2024-11-27","date_estimated":false,"notes":["Calibration of regenerative braking.","General stability improvements."]},{"version":"4.1.10","release_date":"2024-10-31","date_estimated":false,"notes":["Improvements to the infotainment system.","Stability improvement for navigation.","Bug fix for turn-by-turn information text on driver display when destination is set in navigation.","Stability improvements for Car Wash Mode.","Stability improvements for head-up-display (HUD).","Enabling option for Lane Change Assist in Pilot Assist menu.","Improvements to Adaptive Cruise Control."]},{"version":"4.1.9","release_date":"2024-08-21","date_estimated":false,"notes":["General stability improvements."]},{"version":"Polestar OS4.1.7","release_date":"2024-07-10","date_estimated":false,"notes":["Introduction of Digital Key (only for Polestar and certain Meizu phones).","Stability improvements to voice assistant.","General improvements to the infotainment system, including optimisation of music apps and in-car navigation."]},{"version":"PC4.1.5","release_date":null,"date_estimated":false,"notes":["General improvements to the infotainment system.","Improvements to cabin climate system.","Voice assistant optimization.","General improvements to Pilot Assist performance.","Optimization of wireless phone charging."]},{"version":"PC4.1.3","release_date":null,"date_estimated":false,"notes":["Improvements to cabin climate system.","Voice assistant optimization.","General improvements to the infotainment system."]}]};
+
+// ---------- helpers ----------
+const DAY = 86400000;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
+const today = () => { const n = new Date(); return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate())); };
+const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+const daysBetween = (a,b) => Math.round((b - a)/DAY);
+const plural = (n,w) => n + ' ' + w + (n===1?'':'s');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// numeric version compare: "P4.2.10" > "P4.2.9"
+const vkey = v => (String(v).match(/\d+/g)||[]).map(Number);
+const vcmp = (a,b)=>{const A=vkey(a),B=vkey(b);for(let i=0;i<Math.max(A.length,B.length);i++){const d=(A[i]||0)-(B[i]||0);if(d)return d;}return 0;};
+
+// ---------- metrics ----------
+function compute(){
+  // newest-first by version number (matches chronological order for this product)
+  const ups = DATA.updates.map(u => ({...u, d: u.release_date ? parse(u.release_date) : null}))
+                          .sort((a,b)=> vcmp(b.version, a.version));
+
+  // dated entries, oldest->newest, for cadence
+  const datedAsc = [...ups].filter(u=>u.d).sort((a,b)=> a.d - b.d);
+  const intervals = [];
+  for(let i=1;i<datedAsc.length;i++) intervals.push(daysBetween(datedAsc[i-1].d, datedAsc[i].d));
+  const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
+  const sorted = [...intervals].sort((a,b)=>a-b);
+  const median = sorted.length%2 ? sorted[(sorted.length-1)/2] : Math.round((sorted[sorted.length/2-1]+sorted[sorted.length/2])/2);
+
+  const last = datedAsc[datedAsc.length-1];          // newest dated release
+  const now = today();
+  const sinceLast = daysBetween(last.d, now);
+  const predicted = new Date(last.d.getTime() + Math.round(avg)*DAY);
+  const overdue = now > predicted;
+  const overdueBy = daysBetween(predicted, now);
+
+  return {ups, datedAsc, intervals, avg, median, min:sorted[0], max:sorted[sorted.length-1],
+          last, sinceLast, predicted, overdue, overdueBy,
+          datedCount: datedAsc.length, estCount: ups.filter(u=>u.date_estimated).length,
+          unknownCount: ups.filter(u=>!u.d).length, total: ups.length};
+}
+
+// ---------- render ----------
+function render(){
+  const m = compute();
+
+  document.getElementById('banner').innerHTML = `
+    <div>
+      <div class="label">Predicted next update</div>
+      <div class="date">${fmt(m.predicted)}</div>
+      <div class="sub">Last update (${esc(m.last.version)}) was about ${plural(m.sinceLast,'day')} ago. Updates arrive roughly every ${Math.round(m.avg)} days.</div>
+    </div>
+    <div class="badge ${m.overdue?'overdue':'upcoming'}">
+      <span class="dot"></span>${m.overdue ? 'Overdue by '+plural(m.overdueBy,'day') : 'Due in '+plural(-m.overdueBy,'day')}
+    </div>`;
+
+  const stats = [
+    ['Versions', m.total, ''],
+    ['Avg. interval', Math.round(m.avg), '<small>days</small>'],
+    ['Since last update', m.sinceLast, '<small>days</small>'],
+    ['Cadence range', m.min+'–'+m.max, '<small>days</small>'],
+  ];
+  document.getElementById('stats').innerHTML = stats.map(([k,v,s]) =>
+    `<div class="stat"><div class="k">${k}</div><div class="v">${v} ${s}</div></div>`).join('');
+
+  document.getElementById('timeline-note').textContent =
+    'newest first · ' + m.datedCount + ' dated · ' + m.unknownCount + ' undated';
+
+  // gap = days from the next-older DATED entry in the displayed list
+  const list = m.ups;
+  const olderDated = (i) => { for(let j=i+1;j<list.length;j++){ if(list[j].d) return list[j]; } return null; };
+  const gapLabel = (u, older) => {
+    if(!u.d) return '';
+    if(!older) return '<span class="gap zero">first dated</span>';
+    const g = daysBetween(older.d, u.d);
+    if(g === 0) return '<span class="gap zero">same day</span>';
+    return `<span class="gap">+${plural(g,'day')}</span>`;
+  };
+  const dateLabel = (u) => {
+    if(!u.d) return '<span class="date unknown">date unknown</span>';
+    if(u.date_estimated) return `<span class="date est">≈ ${fmt(u.d)}</span>`;
+    return `<span class="date">${fmt(u.d)}</span>`;
+  };
+
+  const html = '<div class="timeline">' + list.map((u,i)=>{
+    const notes = (u.notes||[]).map(n=>`<li>${esc(n)}</li>`).join('');
+    return `<div class="entry ${u.d?'':'nodate'}">
+      <details>
+        <summary>
+          <span class="ver">${esc(u.version)}</span>
+          <span class="meta-row">${gapLabel(u, olderDated(i))}${dateLabel(u)}<span class="chev">▾</span></span>
+        </summary>
+        <div class="notes"><ul>${notes}</ul></div>
+      </details></div>`;
+  }).join('') + '</div>';
+  document.getElementById('timeline-root').innerHTML = html;
+
+  document.getElementById('footer').innerHTML = `
+    <p><strong>About the dates.</strong> ${esc(DATA.meta.timing_note)}</p>
+    <p>Version notes sourced from the <a href="${DATA.meta.authoritative_source}" target="_blank" rel="noopener">Polestar 4 manual</a>.
+       Data captured ${fmt(parse(DATA.meta.scraped_on))}. Unofficial; not affiliated with Polestar.</p>`;
+}
+render();
+</script>
+</body>
+</html>

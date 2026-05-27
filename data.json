@@ -1,0 +1,257 @@
+{
+  "meta": {
+    "title": "Polestar 4 Software Updates",
+    "authoritative_source": "https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/",
+    "timing_note": "Release dates are approximate (“thereabouts”), not exact day-of-release. A few recent versions use an estimated date (marked ≈) and a few older ones have no known date.",
+    "scraped_on": "2026-05-27",
+    "total_versions": 17,
+    "page_version_count": 17
+  },
+  "updates": [
+    {
+      "version": "P4.2.11",
+      "release_date": "2026-03-24",
+      "date_estimated": false,
+      "notes": [
+        "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
+      ]
+    },
+    {
+      "version": "P4.2.10",
+      "release_date": "2026-02-24",
+      "date_estimated": false,
+      "notes": [
+        "Improvements to battery pre-conditioning, including the system now acting more dynamically, allowing the conditioning to start earlier and reach a higher temperature improving overall charging performance",
+        "To start the pre-conditioning it is required to set a DC fast charger (>70 kW) as the destination in the built-in Google Maps app and ensure the estimated state of charge when arriving is kept above 7%",
+        "On long trips with multiple stops, ensure that the charging stop is prioritized and your first stop in the route guidance",
+        "Improvements to the climate system, including a bug fix when the climate system was sporadically blowing cold air",
+        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on parallel roads"
+      ]
+    },
+    {
+      "version": "P4.2.9",
+      "release_date": "2026-02-02",
+      "date_estimated": false,
+      "notes": [
+        "Plug & Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug & Charge supported stations without the need for manual payment, using the secure ISO 15118 standard for communication between the car and charger. Simply find charging stations that support Plug & Charge through Google Maps in the centre display or in the Polestar Charge app",
+        "Activation instructions of Plug & Charge are available in the Polestar App and in the car’s centre display in the Charging menu",
+        "Audible confirmation when locking the vehicle is introduced. After installation the function is set to ‘off’ as a default and can be turned on by users in the exterior settings for locking",
+        "Rear auto brake for static objects during parking manoeuvres is introduced. A button is added in the camera view to disable it, and the function will remain disabled until re-activated by user",
+        "Lane change assist now saves the preferred setting between driving cycles",
+        "Previously, it was default off each driving cycle",
+        "Automatic resume of stop & go when using Pilot assist or Adaptive Cruise Control now cancels the assisted driving after more than 10 seconds of being at a complete standstill",
+        "Automatic headlight functionality now ensures the headlights turn off automatically when the vehicle transitions from active to inactive mode when the driver’s door is opened",
+        "Previously, the headlights remained turned on until the car was locked or the home safety lights cycle was completed (if the setting was activated)",
+        "The headlights will now turn on again to complete the home safety lights cycle if the setting is activated",
+        "Improvements to the infotainment system including translation corrections and minor UX/UI updates such as digital key for Apple watch will now be displayed with a watch symbol in the shared keys list in-car",
+        "Previously, a shared key for Apple Watch was displayed with a phone symbol",
+        "Improvement to the Google maps energy estimation to reflect a more realistic estimated state of charge at arrival using dynamic consumption data",
+        "Previously, the estimation was calculated based on static consumption data",
+        "Improvement to Apple CarPlay including a bug fix for when Siri was interrupted while replying to text messages",
+        "Improvements to the climate settings including a bug fix for when it wasn’t possible to adjust the air vents in the climate settings",
+        "Improvements to syncing settings between the Polestar app and the car",
+        "Improvements to heating of the area for forward looking cameras in the windscreen, including heating of this area to start, if needed, also when pre-conditioning the car",
+        "The heating starts when the ambient temperature is below 1°C/33°F",
+        "Improvements to the alarm internal movement sensor, including improved sensitivity",
+        "Bug fix for when the steering wheel heating didn’t start in colder climates with the automatic steering wheel heat setting activated",
+        "The steering wheel heat starts when the ambient temperature is below 10°C/50°F",
+        "Bug fix for when the steering wheel could create sporadic vibrations in low-speed manoeuvres"
+      ]
+    },
+    {
+      "version": "P4.2.8",
+      "release_date": "2025-12-11",
+      "date_estimated": false,
+      "notes": [
+        "The content of this software update is identical to P4.2.7.",
+        "Compatibility update"
+      ]
+    },
+    {
+      "version": "P4.2.7",
+      "release_date": "2025-10-27",
+      "date_estimated": false,
+      "notes": [
+        "Bug fix for issue where old text messages were reiterated when phone is connecting to Bluetooth",
+        "Centre display stability improvements covering translation corrections",
+        "Video streaming services improvements including mitigation of video signals causing sound to play without picture",
+        "Seat heating improvement to increase the overall seat heating temperature by 2 degrees",
+        "Animal mode now automatically turns off headlights when activated. The headlights will return to chosen setting once animal mode is turned off",
+        "Set climate timers will now start 30 minutes prior set departure time",
+        "Previously the timer started 15 minutes prior set time. Should the user not enter the vehicle at set departure time, the climate will continue to run for an additional 10 minutes before turning off",
+        "Pre-conditioning the cabin climate via direct start in the Polestar app will now run for 30 minutes before switching off",
+        "Previously, the climate ran for 15 minutes after direct start",
+        "Dashcam settings are now saved to driver profiles",
+        "Your preferred settings will now be saved to your driver profile, allowing the user to accept the privacy preference at first time of use only. All settings, including automatic emergency recording, will now remain between drive cycles",
+        "The guest profile will always restore to default settings between drive cycles as well as require an acceptance of the privacy preference at every use",
+        "While parked, if the driver’s door is left open and no driver is detected in the seat, any music currently playing will pause",
+        "Previously, music continued to play until the vehicle was locked",
+        "Improved steering interactions in low speed when using Pilot assist",
+        "Improved braking interactions when using Adaptive Cruise Control (ACC) and Pilot assist",
+        "Adjustment of set target speed value by short press is changed to 1 mph per press. Previously a short press would adjust the target speed by 5 mph. This has now been changed to be adjusted by a long press"
+      ]
+    },
+    {
+      "version": "P4.2.6",
+      "release_date": "2025-09-01",
+      "date_estimated": false,
+      "notes": [
+        "Bug fix for issue where Adaptive Cruise Control would deactivate in trailer mode.",
+        "Improvement to issue with steering wheel vibrations occurring whilst driving at low speeds."
+      ]
+    },
+    {
+      "version": "P4.2.5",
+      "release_date": "2025-07-09",
+      "date_estimated": false,
+      "notes": [
+        "Center display stability improvements",
+        "Edit button now added to the Favorites app and Shortcuts widget",
+        "Previously, the widget could only be edited by holding and pressing the app or shortcut you wish to edit. An edit button has now been added to the top right corner of the widget.",
+        "Speed limit warning turned off. Function now includes a dismiss button to allow the driver to actively dismiss the notification",
+        "A/C climate calibration improvements",
+        "Parking sensors are now deactivated when Car Wash Mode is active",
+        "General stability improvements",
+        "Pilot Assist now uses a new AI-based method for lateral control, following the drive path within the lane instead of just the center. The steering control will now handle road curves in a more natural manner.",
+        "This does not reduce the driver's responsibility to operate the car as safely as possible.",
+        "Lane Keeping Aid now improved to allow setting for steering wheel vibrations only",
+        "Previously the Lane keeping aid system would only allow for an ON or OFF setting, the ON setting would allow both steering interventions and vibrations. You can now select if you want ‘only vibrations’ or ‘vibrations and steering interventions’ when selecting ON. Please note that the steering interventions will still be active for solid road lines and edges.",
+        "Pilot Assist now works up to 150 km/h. If speed exceeds 150 km/h while using Pilot Assist, lateral control will automatically resume when speed drops below 150 km/h again",
+        "Adaptive Cruise Control (ACC) now works up to 180 km/h",
+        "Tuning improvements to ACC and Pilot Assist to provide a smoother acceleration and braking experience",
+        "Pilot Assist improved to avoid unnecessary brake interventions while driving.",
+        "“Driver Not Detected” warnings system improved to reduce amount of false messages"
+      ]
+    },
+    {
+      "version": "P4.2.4",
+      "release_date": "2025-06-09",
+      "date_estimated": false,
+      "notes": [
+        "Launch of dozen new apps through Google Built-in, all which can be enjoyed while the vehicle is parked. Check out the full list of apps on the Google Play Store.",
+        "Driver’s profile will now be selected when opening the driver’s door, even in the scenario where the passenger door has already been unlocked and opened by another key. The driver’s profile needs to have a key already connected for this to function.",
+        "Previously the vehicle would always default to whichever profile’s key opened the car first, not to the driver entering the car.",
+        "More functions have now been added to the favorite's shortcut",
+        "General stability improvements"
+      ]
+    },
+    {
+      "version": "P4.2.3",
+      "release_date": "2025-05-23",
+      "date_estimated": false,
+      "notes": [
+        "Enabling Digital Key functionality for Apple devices for all markets.",
+        "To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is being released for respective markets at a later date.",
+        "Charging speed now shown as kW in driver display.",
+        "Automatic climate mode improved to avoid issue with air conditioning not cooling car sufficiently.",
+        "Centre display stability improvements to prevent unresponsive behaviour or screen resetting.",
+        "Apple CarPlay stability improvements to avoid echo during phone calls in car, as well as connectivity issues between car and phone device.",
+        "Scheduled charging improved resolving issue with timer not setting or charging not starting at set time.",
+        "Digital key improved to prevent issue with centre display settings not correctly showing successfully paired and shared digital keys.",
+        "Favourite shortcuts in centre display improved to prevent issue with loss of saved shortcuts.",
+        "Software release notes now available in centre display.",
+        "Journey Log app enabled. The Journey Log app can be downloaded from Google Play Store and helps drivers automatically track and record trips.",
+        "Dashcam app now available (requires micro-SD card).",
+        "The car will not allow the video stream to be active while driving, however the functions “Record video” and “Take photo” can still be utilized while driving.",
+        "Seat heating stability improvement.",
+        "Charge limit stability improvement to issue with limit unexpectedly changing to 50%.",
+        "Adaptive Cruise Control is now activated by pressing the steering wheel button once. For cars with pilot pack, Adaptive Cruise Control will be activated with one press after activating Pilot Assist. You can toggle between the two functions by pressing the button once.",
+        "Adaptive Cruise Control was previously activated by quickly pressing the Pilot Assist button twice in succession. This has now been removed.",
+        "Pilot Assist & Adaptive Cruise Control set to adapt to the speed limit function reinstated."
+      ]
+    },
+    {
+      "version": "P4.2.2",
+      "release_date": "2025-03-26",
+      "date_estimated": false,
+      "notes": [
+        "Performance of the climate system improved reducing likelihood of condensation on the windows and improve air flow",
+        "Battery pre-conditioning improvements: minimum estimated state-of-charge at arrival now reduced from 22% to 7%. Battery pre-conditioning requires a destination to a DC charger to be set.",
+        "Improvements when toggling between Adaptive Cruise Control and Pilot Assist functions. Your set speed now remains when switching between ACC and PA instead of using the current speed limit as a target speed.",
+        "Introduction of a driver display message alerting you when the driver alert system is temporarily unavailable. This may occur if, for example, you cover parts of your face during driving, and the system cannot detect you.",
+        "Climate system improved to avoid issue with automatic steering wheel heating not activating at low temperatures.",
+        "General stability improvements."
+      ]
+    },
+    {
+      "version": "P4.2.1",
+      "release_date": "2025-02-06",
+      "date_estimated": false,
+      "notes": [
+        "Enabling Digital Key functionality for Apple devices; requires future activation email (Only for European vehicles)",
+        "Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only)",
+        "Introduction of battery preconditioning, applicable when destination to a DC charger is set and the estimated state-of-charge at arrival is above 22%",
+        "Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on the steering wheel control",
+        "Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control",
+        "Adaptive Cruise Control now available with trailer mode",
+        "One pedal drive available in three levels (standard, low, off) via steering wheel controls",
+        "One pedal drive setting now saved to corresponding driver profiles",
+        "Enabler for future Dashcam in-car app (will require micro-SD card).",
+        "Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed"
+      ]
+    },
+    {
+      "version": "4.1.11",
+      "release_date": "2024-11-27",
+      "date_estimated": false,
+      "notes": [
+        "Calibration of regenerative braking.",
+        "General stability improvements."
+      ]
+    },
+    {
+      "version": "4.1.10",
+      "release_date": "2024-10-31",
+      "date_estimated": false,
+      "notes": [
+        "Improvements to the infotainment system.",
+        "Stability improvement for navigation.",
+        "Bug fix for turn-by-turn information text on driver display when destination is set in navigation.",
+        "Stability improvements for Car Wash Mode.",
+        "Stability improvements for head-up-display (HUD).",
+        "Enabling option for Lane Change Assist in Pilot Assist menu.",
+        "Improvements to Adaptive Cruise Control."
+      ]
+    },
+    {
+      "version": "4.1.9",
+      "release_date": "2024-08-21",
+      "date_estimated": false,
+      "notes": [
+        "General stability improvements."
+      ]
+    },
+    {
+      "version": "Polestar OS4.1.7",
+      "release_date": "2024-07-10",
+      "date_estimated": false,
+      "notes": [
+        "Introduction of Digital Key (only for Polestar and certain Meizu phones).",
+        "Stability improvements to voice assistant.",
+        "General improvements to the infotainment system, including optimisation of music apps and in-car navigation."
+      ]
+    },
+    {
+      "version": "PC4.1.5",
+      "release_date": null,
+      "date_estimated": false,
+      "notes": [
+        "General improvements to the infotainment system.",
+        "Improvements to cabin climate system.",
+        "Voice assistant optimization.",
+        "General improvements to Pilot Assist performance.",
+        "Optimization of wireless phone charging."
+      ]
+    },
+    {
+      "version": "PC4.1.3",
+      "release_date": null,
+      "date_estimated": false,
+      "notes": [
+        "Improvements to cabin climate system.",
+        "Voice assistant optimization.",
+        "General improvements to the infotainment system."
+      ]
+    }
+  ]
+}

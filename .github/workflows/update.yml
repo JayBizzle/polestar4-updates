@@ -1,0 +1,61 @@
+name: Update Polestar 4 tracker
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # daily 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: update-polestar4
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Scrape and merge
+        id: scrape
+        run: node scrape.js
+        continue-on-error: true
+
+      - name: Report broken scrape
+        if: steps.scrape.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue create --title "⚠️ Polestar 4 scrape looks broken ($(date -u +%F))" --body-file scrape-error.txt
+
+      - name: Fail the run if scrape broke
+        if: steps.scrape.outcome == 'failure'
+        run: exit 1
+
+      - name: Build, commit & deploy
+        if: steps.scrape.outputs.changed == 'true'
+        env:
+          COMMIT_MESSAGE: ${{ steps.scrape.outputs.commit_message }}
+        run: |
+          node build.js
+          git config user.name "polestar4-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json index.html
+          git commit -m "$COMMIT_MESSAGE"
+          git push
+
+      - name: Announce new version
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.new_versions != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_VERSIONS: ${{ steps.scrape.outputs.new_versions }}
+        run: gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file new-version-issue.md
