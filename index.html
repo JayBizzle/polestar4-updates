@@ -48,6 +48,7 @@
   }
   .banner .label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
   .banner .date{font-size:clamp(26px,5vw,40px);font-weight:300;letter-spacing:-.01em}
+  .banner .date.overdue{color:var(--danger)}
   .banner .sub{color:var(--muted);font-size:14px;margin-top:10px;max-width:46ch}
   .badge{
     display:inline-flex;align-items:center;gap:8px;border-radius:100px;
@@ -190,11 +191,14 @@ function compute(){
 function render(){
   const m = compute();
 
+  const bannerSub = m.overdue
+    ? "That date has passed — Polestar hasn't released the next update yet."
+    : "Last update (" + esc(m.last.version) + ") was about " + plural(m.sinceLast,'day') + " ago.";
   document.getElementById('banner').innerHTML = `
     <div>
       <div class="label">Predicted next update</div>
-      <div class="date">${fmt(m.predicted)}</div>
-      <div class="sub">Last update (${esc(m.last.version)}) was about ${plural(m.sinceLast,'day')} ago. Updates arrive roughly every ${Math.round(m.avg)} days.</div>
+      <div class="date ${m.overdue?'overdue':''}">${fmt(m.predicted)}</div>
+      <div class="sub">${bannerSub} Updates arrive roughly every ${Math.round(m.avg)} days.</div>
     </div>
     <div class="badge ${m.overdue?'overdue':'upcoming'}">
       <span class="dot"></span>${m.overdue ? 'Overdue by '+plural(m.overdueBy,'day') : 'Due in '+plural(-m.overdueBy,'day')}
