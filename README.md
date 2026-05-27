@@ -1,13 +1,14 @@
 # Polestar 4 Software Update Tracker
 
+### 🔗 Live site: <https://jaybizzle.github.io/polestar4-updates/>
+
 A single, self-contained page that tracks Polestar 4 over-the-air software updates:
 release notes, time between releases, average cadence, the predicted next update,
 and whether the next one is overdue.
 
 The data refreshes automatically: a daily GitHub Action scrapes the UK manual,
 merges new/changed releases into `data.json` (never altering manually-gathered
-dates), rebuilds, commits, and deploys to GitHub Pages. See
-`docs/superpowers/specs/2026-05-27-polestar4-hosting-and-auto-update-design.md`.
+dates), rebuilds, commits, and deploys to GitHub Pages.
 
 ## Files
 
@@ -18,7 +19,6 @@ dates), rebuilds, commits, and deploys to GitHub Pages. See
 | `build.js` | Reads `data.json` → writes `index.html`. |
 | `scrape.js` / `lib/scraper.js` | Scraper CLI + pure parse/merge/validate logic. |
 | `.github/workflows/update.yml` | Daily auto-update workflow. |
-| `docs/superpowers/specs/2026-05-27-polestar4-tracker-design.md` | Design spec. |
 
 ## Update the data
 
