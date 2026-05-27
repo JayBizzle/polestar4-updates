@@ -104,6 +104,11 @@ const html = `<!DOCTYPE html>
   }
   summary::-webkit-details-marker{display:none}
   .ver{font-size:17px;font-weight:600;letter-spacing:-.01em}
+  .latest-pill{
+    display:inline-block;margin-left:10px;padding:2px 9px;border-radius:100px;
+    background:var(--ok-soft);color:var(--ok);font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;
+  }
   .meta-row{display:flex;align-items:center;gap:14px;margin-left:auto;color:var(--muted);font-size:13px;flex-wrap:wrap}
   .gap{color:var(--gold);font-weight:600}
   .gap.zero{color:var(--muted);font-weight:400}
@@ -246,7 +251,7 @@ function render(){
     return \`<div class="entry \${u.d?'':'nodate'}">
       <details>
         <summary>
-          <span class="ver">\${esc(u.version)}</span>
+          <span class="ver">\${esc(u.version)}</span>\${i===0 ? '<span class="latest-pill">latest</span>' : ''}
           <span class="meta-row">\${gapLabel(u, olderDated(i))}\${dateLabel(u)}<span class="chev">▾</span></span>
         </summary>
         <div class="notes"><ul>\${notes}</ul></div>
