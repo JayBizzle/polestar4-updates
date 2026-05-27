@@ -76,7 +76,7 @@
   .entry{position:relative;padding-bottom:26px}
   .entry:last-child{padding-bottom:0}
   .entry::before{
-    content:"";position:absolute;left:-35px;top:6px;width:13px;height:13px;border-radius:50%;
+    content:"";position:absolute;box-sizing:border-box;left:-35px;top:6px;width:13px;height:13px;border-radius:50%;
     background:var(--card);border:2px solid var(--gold);
   }
   .entry.nodate::before{border-color:var(--line-strong)}
@@ -121,10 +121,10 @@
 <body>
 <div class="wrap">
   <header class="site">
-    <div class="eyebrow">Unofficial tracker</div>
+    <div class="eyebrow">Unofficial tracker · UK</div>
     <h1>Polestar 4 <b>Software Updates</b></h1>
-    <p class="lede">When the next over-the-air update is likely to land, how often they arrive, and what each one changed. Version notes from
-      <a href="https://www.polestar.com/us/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">Polestar's manual</a>.</p>
+    <p class="lede">When the next over-the-air update is likely to land, how often they arrive, and what each one changed. Tracking the <strong>UK</strong> market — version notes from
+      <a href="https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">Polestar's UK manual</a>.</p>
   </header>
 
   <section class="banner" id="banner"></section>
