@@ -210,16 +210,16 @@ function render(){
   const m = compute();
 
   const bannerSub = m.overdue
-    ? "That date has passed — Polestar hasn't released the next update yet."
-    : "Last update (" + esc(m.last.version) + ") was about " + plural(m.sinceLast,'day') + " ago.";
+    ? "Polestar publishes no schedule, so this is only our estimate: going by the ~" + Math.round(m.avg) + "-day average between past releases, the next one is roughly " + plural(m.overdueBy,'day') + " overdue."
+    : "Last update (" + esc(m.last.version) + ") was about " + plural(m.sinceLast,'day') + " ago. Updates arrive roughly every " + Math.round(m.avg) + " days.";
   document.getElementById('banner').innerHTML = \`
     <div>
       <div class="label">Predicted next update</div>
       <div class="date \${m.overdue?'overdue':''}">\${fmt(m.predicted)}</div>
-      <div class="sub">\${bannerSub} Updates arrive roughly every \${Math.round(m.avg)} days.</div>
+      <div class="sub">\${bannerSub}</div>
     </div>
     <div class="badge \${m.overdue?'overdue':'upcoming'}">
-      <span class="dot"></span>\${m.overdue ? 'Overdue by '+plural(m.overdueBy,'day') : 'Due in '+plural(-m.overdueBy,'day')}
+      <span class="dot"></span>\${m.overdue ? '~'+plural(m.overdueBy,'day')+' overdue (est.)' : 'Due in ~'+plural(-m.overdueBy,'day')}
     </div>\`;
 
   const stats = [
