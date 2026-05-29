@@ -194,15 +194,24 @@ function compute(){
   const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
   const sorted = [...intervals].sort((a,b)=>a-b);
   const median = sorted.length%2 ? sorted[(sorted.length-1)/2] : Math.round((sorted[sorted.length/2-1]+sorted[sorted.length/2])/2);
+  // percentile via linear interpolation on sorted intervals (numpy default)
+  const pct = p => {
+    const idx = (sorted.length-1)*p, lo = Math.floor(idx), hi = Math.ceil(idx);
+    return lo===hi ? sorted[lo] : sorted[lo] + (idx-lo)*(sorted[hi]-sorted[lo]);
+  };
+  const p25 = Math.round(pct(0.25)), p75 = Math.round(pct(0.75));
 
   const last = datedAsc[datedAsc.length-1];          // newest dated release
   const now = today();
   const sinceLast = daysBetween(last.d, now);
-  const predicted = new Date(last.d.getTime() + Math.round(avg)*DAY);
+  // headline + overdue use the median gap; the window is the 25th–75th percentile
+  const predicted = new Date(last.d.getTime() + median*DAY);
   const overdue = now > predicted;
   const overdueBy = daysBetween(predicted, now);
+  const winStart = new Date(last.d.getTime() + p25*DAY);
+  const winEnd = new Date(last.d.getTime() + p75*DAY);
 
-  return {ups, datedAsc, intervals, avg, median, min:sorted[0], max:sorted[sorted.length-1],
+  return {ups, datedAsc, intervals, avg, median, p25, p75, winStart, winEnd, min:sorted[0], max:sorted[sorted.length-1],
           last, sinceLast, predicted, overdue, overdueBy,
           datedCount: datedAsc.length, estCount: ups.filter(u=>u.date_estimated).length,
           unknownCount: ups.filter(u=>!u.d).length, total: ups.length};
@@ -212,13 +221,14 @@ function compute(){
 function render(){
   const m = compute();
 
+  const windowTxt = fmt(m.winStart) + " – " + fmt(m.winEnd);
   const bannerSub = m.overdue
-    ? "Polestar publishes no schedule, so this is only our estimate: going by the ~" + Math.round(m.avg) + "-day average between past releases, the next one is roughly " + plural(m.overdueBy,'day') + " overdue."
-    : "Last update (" + esc(m.last.version) + ") was about " + plural(m.sinceLast,'day') + " ago. Updates arrive roughly every " + Math.round(m.avg) + " days.";
+    ? "Last update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. The likely window (" + windowTxt + ", the middle 50% of past gaps) has passed — now ~" + plural(m.overdueBy,'day') + " past the median estimate of " + plural(m.median,'day') + "."
+    : "Last update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. Past releases land ~" + m.p25 + "–" + m.p75 + " days apart (the middle 50% of gaps); the likely window is " + windowTxt + ".";
   document.getElementById('banner').innerHTML = \`
     <div>
       <div class="label">Predicted next update</div>
-      <div class="date \${m.overdue?'overdue':''}">\${fmt(m.predicted)}</div>
+      <div class="date \${m.overdue?'overdue':''}">~\${fmt(m.predicted)}</div>
       <div class="sub">\${bannerSub}</div>
     </div>
     <div class="badge \${m.overdue?'overdue':'upcoming'}">
