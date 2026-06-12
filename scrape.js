@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 /*
- * scrape.js — fetch the UK Polestar 4 manual, merge new/changed releases into
- * data.json (preserving manually-gathered dates), and emit workflow signals.
+ * scrape.js — fetch Polestar's car-content API (the JSON source behind the
+ * manual's release-notes pages), merge new/changed releases into data.json
+ * (preserving manually-gathered dates), and emit workflow signals.
  *
  * Flags:
- *   --url <url>         source page (default: UK manual)
- *   --html-file <path>  read HTML from a file instead of fetching (tests/offline)
- *   --data <path>       data.json path (default: ./data.json)
- *   --date <YYYY-MM-DD> run date for new versions (default: today UTC)
- *   --dry-run           parse/merge/report but do not write data.json
+ *   --base-url <url>       API origin (default: support-car-content.polestar.volvo.care)
+ *   --content-file <path>  read the en-GB release-notes content JSON from a file (tests/offline)
+ *   --manifest-file <path> read the release-notes manifest JSON from a file (tests/offline)
+ *   --models-file <path>   read the available-car-models JSON from a file (tests/offline)
+ *   --data <path>          data.json path (default: ./data.json)
+ *   --date <YYYY-MM-DD>    run date for new versions (default: today UTC)
+ *   --dry-run              parse/merge/report but do not write data.json
+ *
+ * Offline mode is triggered by --content-file; upcoming-version detection then
+ * additionally needs --manifest-file and --models-file (otherwise the stored
+ * upcoming list is preserved as-is).
  *
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
  * abort, after writing scrape-error.txt. On a new version, writes
@@ -17,9 +24,11 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { parseUpdates, mergeData, validateScrape } = require('./lib/scraper');
+const {
+  parseUpdates, pickContent, upcomingVersions, mergeData, validateScrape,
+  API_BASE, MANIFEST_PATH, MODELS_PATH,
+} = require('./lib/scraper');
 
-const UK_URL = 'https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/';
 const UA = 'Mozilla/5.0 (compatible; polestar4-tracker/1.0; +https://github.com/JayBizzle/polestar4-updates)';
 
 function arg(name, def) {
@@ -32,7 +41,7 @@ const todayUTC = () => new Date().toISOString().slice(0, 10);
 function fail(message) {
   fs.writeFileSync(path.join(__dirname, 'scrape-error.txt'),
     `The Polestar 4 scraper aborted without changing data.json.\n\nReason: ${message}\n\n` +
-    `This usually means the manual page changed structure. Check the parser/selectors.\n`);
+    `This usually means the car-content API changed shape or moved. Check the parser/endpoints.\n`);
   console.error('SCRAPE ABORTED:', message);
   process.exit(1);
 }
@@ -50,13 +59,32 @@ function setOutput(kv) {
   fs.appendFileSync(f, body);
 }
 
-async function getHtml() {
-  const file = argValue('--html-file', undefined);
-  if (file && typeof file === 'string') return fs.readFileSync(file, 'utf8');
-  const url = argValue('--url', UK_URL);
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
+const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+
+async function fetchJson(url) {
+  const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' } });
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
-  return res.text();
+  return res.json();
+}
+
+/** Returns { content, manifest, models } — manifest/models may be null offline. */
+async function getSource() {
+  const contentFile = argValue('--content-file', undefined);
+  if (contentFile && typeof contentFile === 'string') {
+    const manifestFile = argValue('--manifest-file', undefined);
+    const modelsFile = argValue('--models-file', undefined);
+    return {
+      content: readJson(contentFile),
+      manifest: manifestFile ? readJson(manifestFile) : null,
+      models: modelsFile ? readJson(modelsFile) : null,
+    };
+  }
+  const base = argValue('--base-url', API_BASE).replace(/\/$/, '');
+  const manifest = await fetchJson(base + MANIFEST_PATH);
+  const entry = pickContent(manifest, 'en-GB');
+  const content = await fetchJson(`${base}/${entry.relativeUrl.replace(/^\//, '')}`);
+  const models = await fetchJson(base + MODELS_PATH);
+  return { content, manifest, models };
 }
 
 (async () => {
@@ -65,13 +93,17 @@ async function getHtml() {
   if (hasFlag('--date') && !/^\d{4}-\d{2}-\d{2}$/.test(runDate)) fail('--date must be YYYY-MM-DD');
   const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-  let html;
-  try { html = await getHtml(); } catch (e) { return fail(e.message); }
+  let source;
+  try { source = await getSource(); } catch (e) { return fail(e.message); }
 
-  const scraped = parseUpdates(html);
+  const scraped = parseUpdates(source.content);
   try { validateScrape(scraped, existing); } catch (e) { return fail(e.message); }
 
-  const { data, changed, newVersions } = mergeData(existing, scraped, runDate);
+  const upcoming = source.manifest && source.models
+    ? upcomingVersions(source.models, source.manifest.spaceSoftwareVersion)
+    : undefined;
+
+  const { data, changed, newVersions } = mergeData(existing, scraped, runDate, upcoming);
 
   if (changed && !hasFlag('--dry-run')) {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
@@ -91,6 +123,8 @@ async function getHtml() {
       `${preview}\n\n[View the tracker](https://jaybizzle.github.io/polestar4-updates/)\n`);
   }
 
-  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} versions=${scraped.length}`);
+  const upcomingLabel = (data.meta.upcoming || [])
+    .map(u => u.version || `build ${u.internal_version}`).join(', ');
+  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} versions=${scraped.length} upcoming=${upcomingLabel}`);
   setOutput({ changed, new_versions: newVersions.join(', '), commit_message: commitMessage });
 })().catch(e => fail(e.message));

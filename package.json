@@ -9,6 +9,7 @@
     "build": "node build.js",
     "test": "node --test"
   },
-  "engines": { "node": ">=20" },
-  "dependencies": { "cheerio": "^1.0.0" }
+  "engines": {
+    "node": ">=20"
+  }
 }

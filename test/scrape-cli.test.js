@@ -5,11 +5,17 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+const FIXTURES = [
+  '--content-file', 'test/fixtures/release-notes-en-GB.json',
+  '--manifest-file', 'test/fixtures/release-notes-manifest.json',
+  '--models-file', 'test/fixtures/available-car-models.json',
+];
+
 function run(args) {
   return execFileSync('node', ['scrape.js', ...args], { encoding: 'utf8', cwd: path.join(__dirname, '..') });
 }
 
-test('--dry-run against the fixture reports a change without writing', () => {
+test('--dry-run against the fixtures reports a change without writing', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
   const dataPath = path.join(tmp, 'data.json');
   // minimal existing data missing one version -> guaranteed change
@@ -18,32 +24,45 @@ test('--dry-run against the fixture reports a change without writing', () => {
     updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
   }));
   const before = fs.readFileSync(dataPath, 'utf8');
-  const out = run([
-    '--html-file', 'test/fixtures/manual-uk.html',
-    '--data', dataPath, '--date', '2026-05-27', '--dry-run',
-  ]);
+  const out = run([...FIXTURES, '--data', dataPath, '--date', '2026-05-27', '--dry-run']);
   assert.match(out, /changed=true/);
+  assert.match(out, /upcoming=4\.2\.12, 4\.3/);
   assert.equal(fs.readFileSync(dataPath, 'utf8'), before, 'dry-run must not write');
   const issueFile = path.join(__dirname, '..', 'new-version-issue.md');
   if (fs.existsSync(issueFile)) fs.unlinkSync(issueFile);
 });
 
-test('writes merged data and preserves the existing date', () => {
+test('writes merged data, preserves the existing date, stores upcoming', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
   const dataPath = path.join(tmp, 'data.json');
   fs.writeFileSync(dataPath, JSON.stringify({
     meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1 },
     updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
   }));
-  run(['--html-file', 'test/fixtures/manual-uk.html', '--data', dataPath, '--date', '2026-05-27']);
+  run([...FIXTURES, '--data', dataPath, '--date', '2026-05-27']);
   const after = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   assert.equal(after.updates.find(u => u.version === 'P4.2.11').release_date, '2026-03-24');
   assert.ok(after.updates.length >= 17);
+  assert.ok(after.meta.upcoming.some(u => u.version === '4.3'));
   const issueFile = path.join(__dirname, '..', 'new-version-issue.md');
   assert.ok(fs.existsSync(issueFile), 'new-version-issue.md should be written');
   const issueContent = fs.readFileSync(issueFile, 'utf8');
   assert.match(issueContent, /jaybizzle\.github\.io\/polestar4-updates/);
   fs.unlinkSync(issueFile);
+});
+
+test('content file alone preserves the stored upcoming list', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
+  const dataPath = path.join(tmp, 'data.json');
+  fs.writeFileSync(dataPath, JSON.stringify({
+    meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1, upcoming: [{ version: '9.9', internal_version: 99999 }] },
+    updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
+  }));
+  run(['--content-file', 'test/fixtures/release-notes-en-GB.json', '--data', dataPath, '--date', '2026-05-27']);
+  const after = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+  assert.deepEqual(after.meta.upcoming, [{ version: '9.9', internal_version: 99999 }]);
+  const issueFile = path.join(__dirname, '..', 'new-version-issue.md');
+  if (fs.existsSync(issueFile)) fs.unlinkSync(issueFile);
 });
 
 test('GITHUB_OUTPUT receives heredoc-formatted changed key', () => {
@@ -55,10 +74,7 @@ test('GITHUB_OUTPUT receives heredoc-formatted changed key', () => {
   }));
   const outputFile = path.join(tmp, 'github_output.txt');
   fs.writeFileSync(outputFile, '');
-  execFileSync('node', ['scrape.js',
-    '--html-file', 'test/fixtures/manual-uk.html',
-    '--data', dataPath, '--date', '2026-05-27', '--dry-run',
-  ], {
+  execFileSync('node', ['scrape.js', ...FIXTURES, '--data', dataPath, '--date', '2026-05-27', '--dry-run'], {
     encoding: 'utf8',
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, GITHUB_OUTPUT: outputFile },
@@ -77,22 +93,22 @@ test('--date with no value exits non-zero', () => {
     updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
   }));
   assert.throws(
-    () => run(['--html-file', 'test/fixtures/manual-uk.html', '--data', dataPath, '--date']),
+    () => run([...FIXTURES, '--data', dataPath, '--date']),
     'missing --date value should exit non-zero'
   );
   const errFile = path.join(__dirname, '..', 'scrape-error.txt');
   if (fs.existsSync(errFile)) fs.unlinkSync(errFile);
 });
 
-test('exits non-zero and writes scrape-error.txt on empty HTML', () => {
+test('exits non-zero and writes scrape-error.txt on an empty content document', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
   const dataPath = path.join(tmp, 'data.json');
   fs.writeFileSync(dataPath, JSON.stringify({ meta: { page_version_count: 17 }, updates: [] }));
-  const emptyHtml = path.join(tmp, 'empty.html');
-  fs.writeFileSync(emptyHtml, '<html><body>nothing</body></html>');
+  const emptyContent = path.join(tmp, 'empty.json');
+  fs.writeFileSync(emptyContent, JSON.stringify({ releaseNotesDocument: { body: [] } }));
   const errFile = path.join(__dirname, '..', 'scrape-error.txt');
   if (fs.existsSync(errFile)) fs.unlinkSync(errFile);
-  assert.throws(() => run(['--html-file', emptyHtml, '--data', dataPath, '--date', '2026-05-27']));
+  assert.throws(() => run(['--content-file', emptyContent, '--data', dataPath, '--date', '2026-05-27']));
   assert.ok(fs.existsSync(errFile), 'scrape-error.txt should be written');
   fs.unlinkSync(errFile);
 });

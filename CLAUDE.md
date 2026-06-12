@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates daily from Polestar's official UK manual. Live at https://jaybizzle.github.io/polestar4-updates/.
+An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates daily from Polestar's car-content API (`support-car-content.polestar.volvo.care` — the unauthenticated JSON service behind the manual's release-notes pages and the in-car manual app). Live at https://jaybizzle.github.io/polestar4-updates/.
 
 ## Commands
 
@@ -13,31 +13,39 @@ npm test                          # run the whole suite (node --test)
 node --test test/merge.test.js    # run one test file
 node --test --test-name-pattern "existing dates"   # run tests matching a name
 node build.js                     # regenerate index.html from data.json
-node scrape.js                    # LIVE: fetch UK manual, merge into data.json, rebuild needs a separate build.js run
-node scrape.js --html-file test/fixtures/manual-uk.html --dry-run   # offline, no write
-node scrape.js --html-file <f> --data <path> --date 2026-05-27      # deterministic, against a temp data file
+node scrape.js                    # LIVE: fetch the API, merge into data.json, rebuild needs a separate build.js run
+node scrape.js --content-file test/fixtures/release-notes-en-GB.json --manifest-file test/fixtures/release-notes-manifest.json --models-file test/fixtures/available-car-models.json --dry-run   # offline, no write
+node scrape.js --content-file <f> --data <path> --date 2026-05-27   # deterministic, against a temp data file
 ```
 
-`scrape.js` flags: `--url`, `--html-file`, `--data`, `--date YYYY-MM-DD`, `--dry-run`. It writes `data.json` only when content changed; it does **not** run `build.js` itself (the workflow does that as a separate step).
+`scrape.js` flags: `--base-url`, `--content-file`, `--manifest-file`, `--models-file`, `--data`, `--date YYYY-MM-DD`, `--dry-run`. `--content-file` switches to offline mode; without `--manifest-file`+`--models-file` the stored `meta.upcoming` list is preserved untouched. It writes `data.json` only when content changed; it does **not** run `build.js` itself (the workflow does that as a separate step).
+
+## The API
+
+- Manifest (cumulative, all published versions): `GET /api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0` (`814` = Polestar 4 model code; an unreachably high `UNTIL` bound returns everything). Its `content[]` lists per-language JSON docs (fetch via `relativeUrl` against the same host); its `spaceSoftwareVersion` is the newest *published* internal build number.
+- Registered builds (including unpublished): `GET /api/car-content/available-car-models` — pairs `internalVersion` (a YYWW-style build number, e.g. `26170`) with `carVersion` (e.g. `4.3`). Builds above `spaceSoftwareVersion` have no notes yet → they become `meta.upcoming` (early warning, surfaces before any release-notes page updates).
+- The API self-documents at `GET /openapi.json`. It is internal/undocumented — if it breaks, the guard aborts and the workflow files a ⚠️ issue.
 
 ## Architecture
 
 Data flows one direction: **`data.json` (source of truth) → `build.js` → self-contained `index.html`**. `index.html` is generated — never hand-edit it; edit `data.json` and rebuild. All cadence/prediction math runs client-side in the JS embedded in `index.html`.
 
-`lib/scraper.js` holds three pure, separately-tested functions; `scrape.js` is a thin CLI that wires them to I/O and the GitHub Action:
+`lib/scraper.js` holds pure, separately-tested functions (no dependencies); `scrape.js` is a thin CLI that wires them to I/O and the GitHub Action:
 
-- **`parseUpdates(html)`** — cheerio, document-order. A `<h2 data-dcs-type="title">` matching `/Software Version (.+)/` starts a version bucket; **any other `<h2>` is a sub-heading and must NOT end the bucket**. Notes are `li`/`p[data-dcs-type]` inside `section[subtype="release-notes"]`. Nested sub-bullets flatten into separate notes; footnote markers (`[data-dcs-type="footnote"]`) are stripped. The page lists ~17 versions whose labels vary in format (`P4.2.11`, `4.1.11`, `Polestar OS4.1.7`, `PC4.1.5`).
-- **`mergeData(existing, scraped, runDate)`** — reconciles a scrape into `data.json`. `changed` is computed from the `updates` array only (meta excluded) so no-op days don't churn the file.
+- **`parseUpdates(content)`** — walks the per-language content JSON's `body` segments in document order (newest first). **The version label comes from the segment *title*** (`/Software Version (.+)/`), NOT the segment's `softwareVersion` field — titles produce the exact historical labels (`P4.2.11`, `4.1.11`, `Polestar OS4.1.7`, `PC4.1.5`) that `data.json` dates are keyed on. A version may span several segments (market/hardware variants); notes concatenate with exact-duplicate lines deduped. `listItem`/`paragraph`/`listIntro` each yield one note; nested lists flatten into separate notes after their parent; `footnote` and `title` nodes are stripped; inline children concatenate **without** separators (strings carry their own spacing). Notes are a superset of any one market's manual page — item-level `validities`/`features` gating is deliberately ignored.
+- **`pickContent(manifest, language)`** — selects a language entry (`en-GB`) from the manifest's `content[]`.
+- **`upcomingVersions(models, publishedMax)`** — registered builds with `internalVersion > publishedMax` (the manifest's `spaceSoftwareVersion`), as `{version, internal_version}`.
+- **`mergeData(existing, scraped, runDate, upcoming)`** — reconciles a scrape into `data.json`. `changed` is computed from the `updates` array + the `upcoming` list only (other meta excluded) so no-op days don't churn the file. Omitting `upcoming` preserves the stored list.
 - **`validateScrape(scraped, existing)`** — safety guard: throws on 0 versions, any empty-notes version, or a >50% drop vs `meta.page_version_count`. A throw aborts the run with no write.
 
 `.github/workflows/update.yml` runs daily (06:00 UTC) + manual: scrape → on guard failure file a `⚠️` issue and fail; on change commit `data.json`+`index.html` (auto-deploys via Pages) and on a new version file a `🔔` issue (which emails the owner). It reads `changed`/`new_versions`/`commit_message` from `scrape.js`'s `$GITHUB_OUTPUT`.
 
 ## Critical invariants — do not break
 
-- **Manually-gathered dates are frozen.** Polestar publishes no official release dates; the user approximated `release_date`/`date_estimated` by hand. `mergeData` copies these verbatim for existing versions and only assigns a date (the run date) to a brand-new version. Guarded by `test/merge.test.js` → "INVARIANT: existing dates are never modified". Never weaken this. Notes, by contrast, refresh from the UK page.
+- **Manually-gathered dates are frozen.** Polestar publishes no official release dates; the user approximated `release_date`/`date_estimated` by hand. `mergeData` copies these verbatim for existing versions and only assigns a date (the run date) to a brand-new version. Guarded by `test/merge.test.js` → "INVARIANT: existing dates are never modified". Never weaken this. Notes, by contrast, refresh from the API. Equally critical: `parseUpdates` must keep deriving version labels from segment titles so they keep matching the stored keys.
 
 - **`main` is a clean single-commit history.** Project design/planning notes are kept local-only (gitignored) and are **not** committed — when publishing changes, push only the app code, tests, and config.
 
 ## Tests
 
-`node --test` against frozen fixture `test/fixtures/manual-uk.html` (a real captured copy of the UK page). When changing parser behaviour, inspect the fixture to get exact expected strings; keep the structural assertions (version count/order, every-version-has-notes, nested-flatten) intact rather than weakening them.
+`node --test` against frozen fixtures captured from the live API on 2026-06-12: `test/fixtures/release-notes-manifest.json` (UNTIL/99.0.0 manifest), `release-notes-en-GB.json` (cumulative content doc, 17 versions), `available-car-models.json`. When changing parser behaviour, inspect the fixtures to get exact expected strings; keep the structural assertions (version count/order, every-version-has-notes, nested-flatten, dedupe, footnote-strip) intact rather than weakening them.

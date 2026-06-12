@@ -6,7 +6,8 @@ A single, self-contained page that tracks Polestar 4 over-the-air software updat
 release notes, time between releases, average cadence, the predicted next update,
 and whether the next one is overdue.
 
-The data refreshes automatically: a daily GitHub Action scrapes the UK manual,
+The data refreshes automatically: a daily GitHub Action fetches Polestar's
+car-content API (the JSON source behind the manual's release-notes pages),
 merges new/changed releases into `data.json` (never altering manually-gathered
 dates), rebuilds, commits, and deploys to GitHub Pages.
 
@@ -23,7 +24,7 @@ dates), rebuilds, commits, and deploys to GitHub Pages.
 ## How updates happen
 
 The daily GitHub Action (`.github/workflows/update.yml`, 06:00 UTC, plus a manual
-"Run workflow" button) scrapes the UK manual, merges into `data.json`, rebuilds, and
+"Run workflow" button) fetches the release-notes API, merges into `data.json`, rebuilds, and
 pushes — which deploys to GitHub Pages. On a new version it opens a `🔔` issue; if the
 scrape looks broken (no versions, empty notes, or a sudden version-count collapse) it
 opens a `⚠️` issue and changes nothing.
@@ -33,7 +34,7 @@ To run or correct things by hand:
 ```bash
 npm install         # once
 npm test            # run the test suite
-node scrape.js      # fetch the UK manual and merge into data.json
+node scrape.js      # fetch the release-notes API and merge into data.json
 node build.js       # regenerate index.html from data.json
 ```
 

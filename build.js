@@ -147,10 +147,10 @@ const html = `<!DOCTYPE html>
 <body>
 <div class="wrap">
   <header class="site">
-    <div class="eyebrow">Unofficial tracker · UK</div>
+    <div class="eyebrow">Unofficial tracker</div>
     <h1>Polestar 4 <b>Software Updates</b></h1>
-    <p class="lede">When the next over-the-air update is likely to land, how often they arrive, and what each one changed. Tracking the <strong>UK</strong> market — version notes from
-      <a href="${data.meta.authoritative_source}" target="_blank" rel="noopener">Polestar's UK manual</a>.</p>
+    <p class="lede">When the next over-the-air update is likely to land, how often they arrive, and what each one changed. Version notes from
+      <a href="${data.meta.authoritative_source}" target="_blank" rel="noopener">Polestar's official release-notes API</a> (all markets combined).</p>
   </header>
 
   <section class="banner" id="banner"></section>
@@ -278,8 +278,9 @@ function render(){
 
   document.getElementById('footer').innerHTML = \`
     <p><strong>About the dates.</strong> \${esc(DATA.meta.timing_note)}</p>
-    <p>Version notes sourced from the <a href="\${DATA.meta.authoritative_source}" target="_blank" rel="noopener">Polestar 4 UK manual</a>.
-       Unofficial; not affiliated with Polestar.</p>\`;
+    <p>Version notes sourced from <a href="\${DATA.meta.authoritative_source}" target="_blank" rel="noopener">Polestar's official release-notes API</a>
+       (the JSON source behind the <a href="https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">manual's software-updates page</a>;
+       some notes apply to other markets or hardware variants only). Unofficial; not affiliated with Polestar.</p>\`;
 }
 render();
 </script>

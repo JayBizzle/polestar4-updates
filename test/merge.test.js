@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { mergeData } = require('../lib/scraper');
 
-const UK = 'https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/';
+const API = 'https://support-car-content.polestar.volvo.care/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0';
 
 function base() {
   return {
@@ -79,7 +79,36 @@ test('meta is refreshed', () => {
   const scraped = [{ version: 'P4.2.11', notes: ['x'] }, { version: 'PC4.1.3', notes: ['legacy'] }];
   const { data } = mergeData(base(), scraped, '2026-05-27');
   assert.equal(data.meta.scraped_on, '2026-05-27');
-  assert.equal(data.meta.authoritative_source, UK);
+  assert.equal(data.meta.authoritative_source, API);
   assert.equal(data.meta.page_version_count, 2);
   assert.equal(data.meta.total_versions, 2);
+});
+
+const NOOP_SCRAPE = [
+  { version: 'P4.2.11', notes: ['old note'] },
+  { version: 'PC4.1.3', notes: ['legacy'] },
+];
+
+test('upcoming list is stored in meta and a change to it is reported', () => {
+  const upcoming = [{ version: '4.3', internal_version: 26170 }];
+  const { data, changed } = mergeData(base(), NOOP_SCRAPE, '2026-05-27', upcoming);
+  assert.deepEqual(data.meta.upcoming, upcoming);
+  assert.equal(changed, true); // base() has no upcoming list yet
+
+  // Same upcoming list again -> no change.
+  const second = mergeData(data, NOOP_SCRAPE, '2026-05-28', upcoming);
+  assert.equal(second.changed, false);
+
+  // Upcoming list emptied (notes published) -> change.
+  const third = mergeData(data, NOOP_SCRAPE, '2026-05-29', []);
+  assert.equal(third.changed, true);
+  assert.deepEqual(third.data.meta.upcoming, []);
+});
+
+test('omitted upcoming preserves the stored list without reporting a change', () => {
+  const existing = base();
+  existing.meta.upcoming = [{ version: '4.3', internal_version: 26170 }];
+  const { data, changed } = mergeData(existing, NOOP_SCRAPE, '2026-05-27');
+  assert.deepEqual(data.meta.upcoming, [{ version: '4.3', internal_version: 26170 }]);
+  assert.equal(changed, false);
 });
