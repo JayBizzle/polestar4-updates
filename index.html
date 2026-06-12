@@ -60,6 +60,21 @@
   .badge.upcoming{background:var(--ok-soft);color:var(--ok)}
   .badge.upcoming .dot{background:var(--ok)}
 
+  /* Upcoming (registered, unreleased) accordion */
+  .upcoming{margin-bottom:16px}
+  .upcoming summary{padding:14px 18px}
+  .upcoming .ver{font-size:14px;font-weight:600}
+  .count-pill{
+    display:inline-block;padding:2px 9px;border-radius:100px;
+    background:var(--gold-soft);color:var(--gold);font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;
+  }
+  .up-body{padding:0 18px 16px;border-top:1px solid var(--line)}
+  .up-body .hint{font-size:13px;color:var(--muted);margin:13px 0 4px;max-width:64ch}
+  .up-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .up-row:last-child{border-bottom:0}
+  .up-row .build{color:var(--muted);font-size:13px;white-space:nowrap}
+
   /* Stat grid */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 18px}
@@ -136,6 +151,7 @@
   </header>
 
   <section class="banner" id="banner"></section>
+  <section id="upcoming"></section>
   <section class="stats" id="stats"></section>
 
   <div class="sec-h">
@@ -216,6 +232,33 @@ function render(){
     <div class="badge ${m.overdue?'overdue':'upcoming'}">
       <span class="dot"></span>${m.overdue ? '~'+plural(m.overdueBy,'day')+' overdue (est.)' : 'Due in ~'+plural(-m.overdueBy,'day')}
     </div>`;
+
+  // Builds Polestar has registered in its content API but not yet released.
+  const upcoming = (DATA.meta.upcoming || []).filter(u => u.internal_version);
+  if (upcoming.length) {
+    // internal build numbers read as YYWW(+sub-build): 26150 ≈ 2026, week 15
+    const buildLabel = (iv) => {
+      const s = String(iv);
+      if (!/^\d{5,6}$/.test(s)) return 'build ' + esc(s);
+      return `build ${esc(s)} <small>· 20${s.slice(0,2)} wk ${s.slice(2,4)}</small>`;
+    };
+    const rows = upcoming.map(u => {
+      const name = u.version && u.version !== '0.0.0' ? esc(u.version) : 'Unnamed build';
+      return `<div class="up-row"><span class="ver">${name}</span><span class="build" title="Internal build number; reads as year + week">${buildLabel(u.internal_version)}</span></div>`;
+    }).join('');
+    document.getElementById('upcoming').innerHTML = `
+      <details class="upcoming">
+        <summary>
+          <span class="ver">In the pipeline</span>
+          <span class="count-pill">${plural(upcoming.length,'build')}</span>
+          <span class="meta-row">registered, not yet released<span class="chev">▾</span></span>
+        </summary>
+        <div class="up-body">
+          <p class="hint">Polestar has registered these software versions in its content API, but hasn't published release notes for them yet — they're the likely next over-the-air updates. The week is when the build was created, not a release date.</p>
+          ${rows}
+        </div>
+      </details>`;
+  }
 
   const stats = [
     ['Versions', m.total, ''],
