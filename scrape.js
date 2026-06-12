@@ -25,7 +25,7 @@
 const fs = require('fs');
 const path = require('path');
 const {
-  parseUpdates, pickContent, upcomingVersions, mergeData, validateScrape,
+  parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, mergeData, validateScrape,
   API_BASE, MANIFEST_PATH, MODELS_PATH,
 } = require('./lib/scraper');
 
@@ -96,8 +96,9 @@ async function getSource() {
   let source;
   try { source = await getSource(); } catch (e) { return fail(e.message); }
 
-  const scraped = parseUpdates(source.content);
+  let scraped = parseUpdates(source.content);
   try { validateScrape(scraped, existing); } catch (e) { return fail(e.message); }
+  if (source.models) scraped = attachBuildNumbers(scraped, source.models);
 
   const upcoming = source.manifest && source.models
     ? upcomingVersions(source.models, source.manifest.spaceSoftwareVersion)

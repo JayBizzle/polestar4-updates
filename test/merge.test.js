@@ -105,6 +105,22 @@ test('upcoming list is stored in meta and a change to it is reported', () => {
   assert.deepEqual(third.data.meta.upcoming, []);
 });
 
+test('internal_version is added when scraped, kept when the scrape lacks it', () => {
+  // scrape provides a build number -> stored, reported as a change
+  const withBuild = [
+    { version: 'P4.2.11', notes: ['old note'], internal_version: 26120 },
+    { version: 'PC4.1.3', notes: ['legacy'] },
+  ];
+  const first = mergeData(base(), withBuild, '2026-05-27');
+  assert.equal(first.data.updates.find(u => u.version === 'P4.2.11').internal_version, 26120);
+  assert.ok(!('internal_version' in first.data.updates.find(u => u.version === 'PC4.1.3')));
+  assert.equal(first.changed, true);
+  // a later scrape without build numbers (offline/models outage) keeps it, no change
+  const second = mergeData(first.data, NOOP_SCRAPE, '2026-05-28');
+  assert.equal(second.data.updates.find(u => u.version === 'P4.2.11').internal_version, 26120);
+  assert.equal(second.changed, false);
+});
+
 test('omitted upcoming preserves the stored list without reporting a change', () => {
   const existing = base();
   existing.meta.upcoming = [{ version: '4.3', internal_version: 26170 }];

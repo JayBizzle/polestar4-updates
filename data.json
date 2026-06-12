@@ -26,6 +26,7 @@
       "version": "P4.2.11",
       "release_date": "2026-03-24",
       "date_estimated": false,
+      "internal_version": 26120,
       "notes": [
         "This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates."
       ]
@@ -34,6 +35,7 @@
       "version": "P4.2.10",
       "release_date": "2026-02-24",
       "date_estimated": false,
+      "internal_version": 26090,
       "notes": [
         "Improvements to battery pre-conditioning, including the system now acting more dynamically, allowing the conditioning to start earlier and reach a higher temperature improving overall charging performance",
         "To start the pre-conditioning it is required to set a DC fast charger (>70 kW) as the destination in the built-in Google Maps app and ensure the estimated state of charge when arriving is kept above 7%",
@@ -48,6 +50,7 @@
       "version": "P4.2.9",
       "release_date": "2026-02-02",
       "date_estimated": false,
+      "internal_version": 25510,
       "notes": [
         "Plug & Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug & Charge supported stations without the need for manual payment, using the secure ISO 15118 standard for communication between the car and charger. Simply find charging stations that support Plug & Charge through Google Maps in the centre display or in the Polestar Charge app",
         "Activation instructions of Plug & Charge are available in the Polestar App and in the car’s centre display in the Charging menu",
@@ -84,6 +87,7 @@
       "version": "P4.2.8",
       "release_date": "2025-12-11",
       "date_estimated": false,
+      "internal_version": 25441,
       "notes": [
         "The content of this software update is identical to P4.2.7.",
         "Bug fix for when TMAP was not showing the map in the driver display unless a navigation route was active",
@@ -94,6 +98,7 @@
       "version": "P4.2.7",
       "release_date": "2025-10-27",
       "date_estimated": false,
+      "internal_version": 25440,
       "notes": [
         "Bug fix for issue where old text messages were reiterated when phone is connecting to Bluetooth",
         "Centre display stability improvements covering translation corrections",
@@ -121,6 +126,7 @@
       "version": "P4.2.6",
       "release_date": "2025-09-01",
       "date_estimated": false,
+      "internal_version": 25330,
       "notes": [
         "Bug fix for issue where Adaptive Cruise Control would deactivate in trailer mode.",
         "Improvement to issue with steering wheel vibrations occurring whilst driving at low speeds."
@@ -130,6 +136,7 @@
       "version": "P4.2.5",
       "release_date": "2025-07-09",
       "date_estimated": false,
+      "internal_version": 25260,
       "notes": [
         "Center display stability improvements",
         "Edit button now added to the Favorites app and Shortcuts widget",
@@ -154,6 +161,7 @@
       "version": "P4.2.4",
       "release_date": "2025-06-09",
       "date_estimated": false,
+      "internal_version": 25240,
       "notes": [
         "Launch of dozen new apps through Google Built-in, all which can be enjoyed while the vehicle is parked. Check out the full list of apps on the Google Play Store.",
         "Driver’s profile will now be selected when opening the driver’s door, even in the scenario where the passenger door has already been unlocked and opened by another key. The driver’s profile needs to have a key already connected for this to function.",
@@ -169,6 +177,7 @@
       "version": "P4.2.3",
       "release_date": "2025-05-23",
       "date_estimated": false,
+      "internal_version": 25190,
       "notes": [
         "Enabling Digital Key functionality for Apple devices for all markets.",
         "To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is being released for respective markets at a later date.",
@@ -195,6 +204,7 @@
       "version": "P4.2.2",
       "release_date": "2025-03-26",
       "date_estimated": false,
+      "internal_version": 25140,
       "notes": [
         "Performance of the climate system improved reducing likelihood of condensation on the windows and improve air flow",
         "Battery pre-conditioning improvements: minimum estimated state-of-charge at arrival now reduced from 22% to 7%. Battery pre-conditioning requires a destination to a DC charger to be set.",
@@ -211,6 +221,7 @@
       "version": "P4.2.1",
       "release_date": "2025-02-06",
       "date_estimated": false,
+      "internal_version": 25040,
       "notes": [
         "Enabling Digital Key functionality for Apple devices; requires future activation email (Only for European vehicles)",
         "Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only)",
@@ -234,6 +245,7 @@
       "version": "4.1.11",
       "release_date": "2024-11-27",
       "date_estimated": false,
+      "internal_version": 24480,
       "notes": [
         "Calibration of regenerative braking.",
         "General stability improvements."
@@ -243,6 +255,7 @@
       "version": "4.1.10",
       "release_date": "2024-10-31",
       "date_estimated": false,
+      "internal_version": 24440,
       "notes": [
         "Introducing Apple CarPlay.",
         "Improvements to the infotainment system.",
@@ -272,6 +285,7 @@
       "version": "Polestar OS4.1.7",
       "release_date": "2024-07-10",
       "date_estimated": false,
+      "internal_version": 24210,
       "notes": [
         "Introduction of Digital Key (only for Polestar and certain Meizu phones).",
         "Stability improvements to voice assistant.",
@@ -282,6 +296,7 @@
       "version": "PC4.1.5",
       "release_date": null,
       "date_estimated": false,
+      "internal_version": 24200,
       "notes": [
         "General improvements to the infotainment system.",
         "Improvements to cabin climate system.",
@@ -294,6 +309,7 @@
       "version": "PC4.1.3",
       "release_date": null,
       "date_estimated": false,
+      "internal_version": 24060,
       "notes": [
         "Improvements to cabin climate system.",
         "Voice assistant optimization.",

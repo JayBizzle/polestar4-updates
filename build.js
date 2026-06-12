@@ -92,6 +92,8 @@ const html = `<!DOCTYPE html>
   .up-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px}
   .up-row:last-child{border-bottom:0}
   .up-row .build{color:var(--muted);font-size:13px;white-space:nowrap}
+  .build-line{margin-top:13px;font-size:12.5px;color:var(--muted)}
+  .build-line + ul{margin-top:10px}
 
   /* Stat grid */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:48px}
@@ -193,6 +195,12 @@ const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:
 const daysBetween = (a,b) => Math.round((b - a)/DAY);
 const plural = (n,w) => n + ' ' + w + (n===1?'':'s');
 const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// internal build numbers read as YYWW(+sub-build): 26150 ≈ 2026, week 15
+const buildLabel = iv => {
+  const s = String(iv);
+  if(!/^\\d{5,6}$/.test(s)) return 'build ' + esc(s);
+  return \`build \${esc(s)} <small>· 20\${s.slice(0,2)} wk \${s.slice(2,4)}</small>\`;
+};
 // numeric version compare: "P4.2.10" > "P4.2.9"
 const vkey = v => (String(v).match(/\\d+/g)||[]).map(Number);
 const vcmp = (a,b)=>{const A=vkey(a),B=vkey(b);for(let i=0;i<Math.max(A.length,B.length);i++){const d=(A[i]||0)-(B[i]||0);if(d)return d;}return 0;};
@@ -254,12 +262,6 @@ function render(){
   // Builds Polestar has registered in its content API but not yet released.
   const upcoming = (DATA.meta.upcoming || []).filter(u => u.internal_version);
   if (upcoming.length) {
-    // internal build numbers read as YYWW(+sub-build): 26150 ≈ 2026, week 15
-    const buildLabel = (iv) => {
-      const s = String(iv);
-      if (!/^\\d{5,6}$/.test(s)) return 'build ' + esc(s);
-      return \`build \${esc(s)} <small>· 20\${s.slice(0,2)} wk \${s.slice(2,4)}</small>\`;
-    };
     const rows = upcoming.map(u => {
       const name = u.version && u.version !== '0.0.0' ? esc(u.version) : 'Unnamed build';
       return \`<div class="up-row"><span class="ver">\${name}</span><span class="build" title="Internal build number; reads as year + week">\${buildLabel(u.internal_version)}</span></div>\`;
@@ -314,7 +316,7 @@ function render(){
           <span class="ver">\${esc(u.version)}</span>\${i===0 ? '<span class="latest-pill">latest</span>' : ''}
           <span class="meta-row">\${gapLabel(u, olderDated(i))}\${dateLabel(u)}<span class="chev">▾</span></span>
         </summary>
-        <div class="notes"><ul>\${notes}</ul></div>
+        <div class="notes">\${u.internal_version ? \`<div class="build-line" title="Internal build number; the week is when the build was created, not the release date">\${buildLabel(u.internal_version)}</div>\` : ''}<ul>\${notes}</ul></div>
       </details></div>\`;
   }).join('') + '</div>';
   document.getElementById('timeline-root').innerHTML = html;

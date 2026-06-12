@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { parseUpdates, pickContent, upcomingVersions } = require('../lib/scraper');
+const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers } = require('../lib/scraper');
 
 const content = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-en-GB.json'), 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-manifest.json'), 'utf8'));
@@ -82,6 +82,18 @@ test('pickContent finds the en-GB entry and rejects unknown languages', () => {
   assert.equal(entry.language, 'en-GB');
   assert.match(entry.relativeUrl, /^api\/car-content\/downloads\/content\//);
   assert.throws(() => pickContent(manifest, 'xx-XX'), /No xx-XX content/);
+});
+
+test('attachBuildNumbers matches all label formats against the models feed', () => {
+  const annotated = attachBuildNumbers(updates, models);
+  const by = Object.fromEntries(annotated.map(u => [u.version, u]));
+  assert.equal(by['P4.2.11'].internal_version, 26120);
+  assert.equal(by['Polestar OS4.1.7'].internal_version, 24210);
+  assert.equal(by['PC4.1.3'].internal_version, 24060);
+  // 4.1.9 has no entry in the models feed — must stay unannotated, not guessed.
+  assert.ok(!('internal_version' in by['4.1.9']));
+  // notes pass through untouched
+  assert.deepEqual(annotated.map(u => u.notes), updates.map(u => u.notes));
 });
 
 test('upcomingVersions returns registered builds above the published max', () => {
