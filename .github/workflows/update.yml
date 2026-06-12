@@ -2,7 +2,7 @@ name: Update Polestar 4 tracker
 
 on:
   schedule:
-    - cron: "0 6,14,22 * * *"   # 3×/day at 06:00, 14:00, 22:00 UTC
+    - cron: "23 * * * *"   # hourly (xx:23 — top-of-hour schedules get delayed/dropped)
   workflow_dispatch:
 
 permissions:
@@ -35,7 +35,14 @@ jobs:
         if: steps.scrape.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh issue create --title "⚠️ Polestar 4 scrape looks broken ($(date -u +%F))" --body-file scrape-error.txt
+        # hourly schedule: only file the alert if one isn't already open
+        run: |
+          open_count=$(gh issue list --state open --search '"scrape looks broken" in:title' --json number --jq 'length')
+          if [ "$open_count" = "0" ]; then
+            gh issue create --title "⚠️ Polestar 4 scrape looks broken ($(date -u +%F))" --body-file scrape-error.txt
+          else
+            echo "Skipping: a 'scrape looks broken' issue is already open."
+          fi
 
       - name: Fail the run if scrape broke
         if: steps.scrape.outcome == 'failure'

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates daily from Polestar's car-content API (`support-car-content.polestar.volvo.care` — the unauthenticated JSON service behind the manual's release-notes pages and the in-car manual app). Live at https://jaybizzle.github.io/polestar4-updates/.
+An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates hourly from Polestar's car-content API (`support-car-content.polestar.volvo.care` — the unauthenticated JSON service behind the manual's release-notes pages and the in-car manual app). Live at https://jaybizzle.github.io/polestar4-updates/.
 
 ## Commands
 
@@ -39,7 +39,7 @@ Data flows one direction: **`data.json` (source of truth) → `build.js` → sel
 - **`mergeData(existing, scraped, runDate, upcoming)`** — reconciles a scrape into `data.json`. `changed` is computed from the `updates` array + the `upcoming` list only (other meta excluded) so no-op days don't churn the file. Omitting `upcoming` preserves the stored list.
 - **`validateScrape(scraped, existing)`** — safety guard: throws on 0 versions, any empty-notes version, or a >50% drop vs `meta.page_version_count`. A throw aborts the run with no write.
 
-`.github/workflows/update.yml` runs daily (06:00 UTC) + manual: scrape → on guard failure file a `⚠️` issue and fail; on change commit `data.json`+`index.html` (auto-deploys via Pages) and on a new version file a `🔔` issue (which emails the owner). It reads `changed`/`new_versions`/`commit_message` from `scrape.js`'s `$GITHUB_OUTPUT`.
+`.github/workflows/update.yml` runs hourly (xx:23 UTC) + manual: scrape → on guard failure file a `⚠️` issue (deduped: skipped while one is already open) and fail; on change commit `data.json`+`index.html` (auto-deploys via Pages) and on a new version file a `🔔` issue (which emails the owner). It reads `changed`/`new_versions`/`commit_message` from `scrape.js`'s `$GITHUB_OUTPUT`.
 
 ## Critical invariants — do not break
 
