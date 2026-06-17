@@ -65,4 +65,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           NEW_VERSIONS: ${{ steps.scrape.outputs.new_versions }}
-        run: gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file new-version-issue.md
+          OWNER: ${{ github.repository_owner }}
+        # @mention + assign the owner: both are "Direct" notifications, which the
+        # GitHub mobile app pushes by default (plain "watching" issues do not).
+        run: |
+          { echo "@$OWNER — a new Polestar 4 software update is live."; echo; cat new-version-issue.md; } > issue-body.md
+          gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file issue-body.md --assignee "$OWNER"
