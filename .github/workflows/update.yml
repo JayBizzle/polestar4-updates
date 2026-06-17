@@ -71,3 +71,20 @@ jobs:
         run: |
           { echo "@$OWNER — a new Polestar 4 software update is live."; echo; cat new-version-issue.md; } > issue-body.md
           gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file issue-body.md --assignee "$OWNER"
+
+      - name: Push notification (ntfy)
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.new_versions != ''
+        continue-on-error: true   # a notification outage must not fail the update
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NEW_VERSIONS: ${{ steps.scrape.outputs.new_versions }}
+        # Dormant until the NTFY_TOPIC repo secret is set. Phone-push independent
+        # of GitHub's notification routing.
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC not set — skipping push."; exit 0; fi
+          curl -fsS \
+            -H "Title: New Polestar 4 update: $NEW_VERSIONS" \
+            -H "Tags: bell,car" \
+            -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
+            -d "Release notes are live. Tap to open the tracker." \
+            "https://ntfy.sh/$NTFY_TOPIC"
