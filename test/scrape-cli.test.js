@@ -9,6 +9,7 @@ const FIXTURES = [
   '--content-file', 'test/fixtures/release-notes-en-GB.json',
   '--manifest-file', 'test/fixtures/release-notes-manifest.json',
   '--models-file', 'test/fixtures/available-car-models.json',
+  '--website-file', 'test/fixtures/website-software-updates.html',
 ];
 
 function run(args) {
@@ -61,6 +62,28 @@ test('writes merged data, preserves the existing date, stores upcoming', () => {
   const notesFile = path.join(__dirname, '..', 'notes-change.md');
   assert.ok(fs.existsSync(notesFile), 'notes-change.md should be written');
   assert.match(fs.readFileSync(notesFile, 'utf8'), /^P4\.2\.11\n[-+]/m);
+});
+
+test('website cross-check flags an API-only version as prerelease', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
+  const dataPath = path.join(tmp, 'data.json');
+  fs.writeFileSync(dataPath, JSON.stringify({
+    meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1 },
+    updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
+  }));
+  // a website listing missing the newest version (P4.2.11) — simulates the API
+  // leading the public page
+  const siteFile = path.join(tmp, 'site.html');
+  const labels = ['P4.2.10','P4.2.9','P4.2.8','P4.2.7','P4.2.6','P4.2.5','P4.2.4','P4.2.3','P4.2.2','P4.2.1','4.1.11','4.1.10','4.1.9','Polestar OS4.1.7','PC4.1.5','PC4.1.3'];
+  fs.writeFileSync(siteFile, labels.map(v => `<h2>Software Version ${v}</h2>`).join('\n'));
+  const out = run([
+    '--content-file', 'test/fixtures/release-notes-en-GB.json',
+    '--website-file', siteFile, '--data', dataPath, '--date', '2026-05-27',
+  ]);
+  assert.match(out, /prerelease=P4\.2\.11/);
+  const after = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+  assert.equal(after.updates.find(u => u.version === 'P4.2.11').prerelease, true);
+  assert.ok(!('prerelease' in after.updates.find(u => u.version === 'PC4.1.3')), 'older listed version is not prerelease');
 });
 
 test('content file alone preserves the stored upcoming list', () => {

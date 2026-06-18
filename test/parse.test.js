@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers } = require('../lib/scraper');
+const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, parseWebsiteVersions } = require('../lib/scraper');
 
 const content = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-en-GB.json'), 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-manifest.json'), 'utf8'));
@@ -94,6 +94,28 @@ test('attachBuildNumbers matches all label formats against the models feed', () 
   assert.ok(!('internal_version' in by['4.1.9']));
   // notes pass through untouched
   assert.deepEqual(annotated.map(u => u.notes), updates.map(u => u.notes));
+});
+
+test('parseWebsiteVersions extracts headings and ignores lowercase prose', () => {
+  const html = `
+    <p>For your software version, we recommend you restart.</p>
+    <h2>Updates In Software Version P4.2.14</h2>
+    <h2>Updates In Software Version P4.2.1:</h2>
+    <h2>Updates In Software Version Polestar OS4.1.7:</h2>
+    <div>{"title":"Software Version PC4.1.5 "}</div>`;
+  const set = parseWebsiteVersions(html);
+  assert.deepEqual([...set].sort(), ['P4.2.1', 'P4.2.14', 'PC4.1.5', 'Polestar OS4.1.7']);
+  // P4.2.1 present must NOT be read as P4.2.14 (exact membership, no prefix bleed)
+  assert.ok(set.has('P4.2.1') && set.has('P4.2.14'));
+  // the lowercase prose "software version, we recommend" is not a version
+  assert.ok(![...set].some(v => /recommend/.test(v)));
+});
+
+test('parseWebsiteVersions on the captured fixture yields the 17 official versions', () => {
+  const html = fs.readFileSync(path.join(__dirname, 'fixtures/website-software-updates.html'), 'utf8');
+  const set = parseWebsiteVersions(html);
+  assert.equal(set.size, 17);
+  assert.ok(set.has('Polestar OS4.1.7') && set.has('PC4.1.3'));
 });
 
 test('upcomingVersions returns registered builds above the published max', () => {

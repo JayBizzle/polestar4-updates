@@ -154,6 +154,43 @@ test('internal_version is added when scraped, kept when the scrape lacks it', ()
   assert.equal(second.changed, false);
 });
 
+test('prerelease: versions absent from websiteVersions are flagged, present ones are not', () => {
+  const scraped = [
+    { version: 'P4.2.12', notes: ['brand new'] },   // not on site -> prerelease
+    { version: 'P4.2.11', notes: ['old note'] },     // on site -> official
+    { version: 'PC4.1.3', notes: ['legacy'] },       // on site -> official
+  ];
+  const site = new Set(['P4.2.11', 'PC4.1.3']);
+  const { data, newVersions } = mergeData(base(), scraped, '2026-05-27', undefined, site);
+  assert.equal(data.updates.find(u => u.version === 'P4.2.12').prerelease, true);
+  assert.ok(!('prerelease' in data.updates.find(u => u.version === 'P4.2.11')));
+  assert.deepEqual(newVersions, ['P4.2.12']);
+});
+
+test('prerelease: a flip from prerelease to official is reported as a change', () => {
+  const existing = base();
+  existing.updates[0].prerelease = true;             // P4.2.11 currently prerelease
+  const scraped = [{ version: 'P4.2.11', notes: ['old note'] }, { version: 'PC4.1.3', notes: ['legacy'] }];
+  const { data, changed } = mergeData(existing, scraped, '2026-05-27', undefined, new Set(['P4.2.11', 'PC4.1.3']));
+  assert.ok(!('prerelease' in data.updates.find(u => u.version === 'P4.2.11')));
+  assert.equal(changed, true);
+});
+
+test('prerelease: without websiteVersions, stored flags are preserved and new versions are conservative', () => {
+  const existing = base();
+  existing.updates[0].prerelease = true;             // P4.2.11 stays prerelease (no site data to clear it)
+  const scraped = [
+    { version: 'P4.2.12', notes: ['brand new'] },    // new + unverifiable -> prerelease
+    { version: 'P4.2.11', notes: ['old note'] },
+    { version: 'PC4.1.3', notes: ['legacy'] },
+  ];
+  const { data, changed } = mergeData(existing, scraped, '2026-05-27');   // no websiteVersions
+  assert.equal(data.updates.find(u => u.version === 'P4.2.11').prerelease, true);
+  assert.equal(data.updates.find(u => u.version === 'P4.2.12').prerelease, true);
+  // P4.2.11 flag preserved, only P4.2.12 added -> changed because of the new version
+  assert.equal(changed, true);
+});
+
 test('omitted upcoming preserves the stored list without reporting a change', () => {
   const existing = base();
   existing.meta.upcoming = [{ version: '4.3', internal_version: 26170 }];

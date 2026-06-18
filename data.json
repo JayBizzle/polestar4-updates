@@ -23,6 +23,7 @@
       "release_date": "2026-06-17",
       "date_estimated": false,
       "internal_version": 26160,
+      "prerelease": true,
       "notes": [
         "The Creep drive setting is now saved to corresponding driver profiles",
         "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",

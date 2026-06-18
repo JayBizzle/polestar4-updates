@@ -33,6 +33,7 @@ const html = `<!DOCTYPE html>
     --gold:#b08d4f; --gold-soft:#f0e7d6;
     --danger:#b23b3b; --danger-soft:#f6e4e2;
     --ok:#3c7d57; --ok-soft:#e2efe7;
+    --warn:#b56a2b; --warn-soft:#f5e7d8;
     --radius:14px;
     --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
@@ -129,6 +130,13 @@ const html = `<!DOCTYPE html>
     background:var(--ok-soft);color:var(--ok);font-size:11px;font-weight:600;
     letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;
   }
+  .pre-pill{
+    display:inline-block;margin-left:10px;padding:2px 9px;border-radius:100px;
+    background:var(--warn-soft);color:var(--warn);font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;
+  }
+  .entry.pre::before{border-color:var(--warn)}
+  .banner .sub.pre{color:var(--warn);margin-top:8px}
   .meta-row{display:flex;align-items:center;gap:14px;margin-left:auto;color:var(--muted);font-size:13px;flex-wrap:wrap}
   .gap{color:var(--gold);font-weight:600}
   .gap.zero{color:var(--muted);font-weight:400}
@@ -210,8 +218,15 @@ function compute(){
   const ups = DATA.updates.map(u => ({...u, d: u.release_date ? parse(u.release_date) : null}))
                           .sort((a,b)=> vcmp(b.version, a.version));
 
-  // dated entries, oldest->newest, for cadence
-  const datedAsc = [...ups].filter(u=>u.d).sort((a,b)=> a.d - b.d);
+  // prereleases: in the API but not yet on Polestar's public site. Excluded
+  // from cadence/prediction; the latest OFFICIAL version drives those.
+  const prereleases = ups.filter(u=>u.prerelease);
+  const latestOfficial = ups.find(u=>!u.prerelease) || ups[0];
+
+  // dated official entries, oldest->newest, for cadence (fall back to all dated
+  // if somehow nothing official is dated, so the banner never breaks)
+  let datedAsc = [...ups].filter(u=>u.d && !u.prerelease).sort((a,b)=> a.d - b.d);
+  if(!datedAsc.length) datedAsc = [...ups].filter(u=>u.d).sort((a,b)=> a.d - b.d);
   const intervals = [];
   for(let i=1;i<datedAsc.length;i++) intervals.push(daysBetween(datedAsc[i-1].d, datedAsc[i].d));
   const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
@@ -236,6 +251,7 @@ function compute(){
 
   return {ups, datedAsc, intervals, avg, median, p25, p75, winStart, winEnd, min:sorted[0], max:sorted[sorted.length-1],
           last, sinceLast, predicted, overdue, overdueBy,
+          prereleases, latestOfficial,
           datedCount: datedAsc.length, estCount: ups.filter(u=>u.date_estimated).length,
           unknownCount: ups.filter(u=>!u.d).length, total: ups.length};
 }
@@ -246,13 +262,19 @@ function render(){
 
   const windowTxt = fmt(m.winStart) + " – " + fmt(m.winEnd);
   const bannerSub = m.overdue
-    ? "Last update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. The likely window (" + windowTxt + ", the middle 50% of past gaps) has passed — now ~" + plural(m.overdueBy,'day') + " past the median estimate of " + plural(m.median,'day') + "."
-    : "Last update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. Past releases land ~" + m.p25 + "–" + m.p75 + " days apart (the middle 50% of gaps); the likely window is " + windowTxt + ".";
+    ? "Last official update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. The likely window (" + windowTxt + ", the middle 50% of past gaps) has passed — now ~" + plural(m.overdueBy,'day') + " past the median estimate of " + plural(m.median,'day') + "."
+    : "Last official update (" + esc(m.last.version) + ") was " + plural(m.sinceLast,'day') + " ago. Past releases land ~" + m.p25 + "–" + m.p75 + " days apart (the middle 50% of gaps); the likely window is " + windowTxt + ".";
+  // Callout when a version is already in Polestar's API but not yet on the public site.
+  const preNote = m.prereleases.length
+    ? '<div class="sub pre">' + m.prereleases.map(p=>esc(p.version)).join(', ') +
+      (m.prereleases.length>1?' are':' is') + ' already pre-releasing — found in Polestar\\'s update API, not yet on the official site.</div>'
+    : '';
   document.getElementById('banner').innerHTML = \`
     <div>
       <div class="label">Predicted next update</div>
       <div class="date \${m.overdue?'overdue':''}">~\${fmt(m.predicted)}</div>
       <div class="sub">\${bannerSub}</div>
+      \${preNote}
     </div>
     <div class="badge \${m.overdue?'overdue':'upcoming'}">
       <span class="dot"></span>\${m.overdue ? '~'+plural(m.overdueBy,'day')+' overdue (est.)' : 'Due in ~'+plural(-m.overdueBy,'day')}
@@ -289,7 +311,9 @@ function render(){
     \`<div class="stat"><div class="k">\${k}</div><div class="v">\${v} \${s}</div></div>\`).join('');
 
   document.getElementById('timeline-note').textContent =
-    'newest first · ' + m.datedCount + ' dated · ' + m.unknownCount + ' undated';
+    'newest first · ' + m.datedCount + ' dated' +
+    (m.prereleases.length ? ' · ' + m.prereleases.length + ' pre-release' : '') +
+    ' · ' + m.unknownCount + ' undated';
 
   // gap = days from the next-older DATED entry in the displayed list
   const list = m.ups;
@@ -309,11 +333,16 @@ function render(){
 
   const html = '<div class="timeline">' + list.map((u,i)=>{
     const notes = (u.notes||[]).map(n=>\`<li>\${esc(n)}</li>\`).join('');
-    return \`<div class="entry \${u.d?'':'nodate'}">
+    const pill = u.prerelease
+      ? '<span class="pre-pill" title="In Polestar\\'s update API but not yet on the official site">pre-release</span>'
+      : (u === m.latestOfficial ? '<span class="latest-pill">latest</span>' : '');
+    return \`<div class="entry \${u.prerelease?'pre':(u.d?'':'nodate')}">
       <details>
         <summary>
-          <span class="ver">\${esc(u.version)}</span>\${i===0 ? '<span class="latest-pill">latest</span>' : ''}
-          <span class="meta-row">\${gapLabel(u, olderDated(i))}\${dateLabel(u)}<span class="chev">▾</span></span>
+          <span class="ver">\${esc(u.version)}</span>\${pill}
+          <span class="meta-row">\${u.prerelease
+            ? '<span class="date est" title="When this version first appeared in Polestar\\'s update API">found ~'+fmt(u.d)+'</span>'
+            : gapLabel(u, olderDated(i))+dateLabel(u)}<span class="chev">▾</span></span>
         </summary>
         <div class="notes">\${u.internal_version ? \`<div class="build-line" title="Internal build number; the week is when the build was created, not the release date">\${buildLabel(u.internal_version)}</div>\` : ''}<ul>\${notes}</ul></div>
       </details></div>\`;

@@ -9,13 +9,15 @@
  *   --content-file <path>  read the en-GB release-notes content JSON from a file (tests/offline)
  *   --manifest-file <path> read the release-notes manifest JSON from a file (tests/offline)
  *   --models-file <path>   read the available-car-models JSON from a file (tests/offline)
+ *   --website-file <path>  read the public manual HTML from a file (tests/offline) for the prerelease cross-check
  *   --data <path>          data.json path (default: ./data.json)
  *   --date <YYYY-MM-DD>    run date for new versions (default: today UTC)
  *   --dry-run              parse/merge/report but do not write data.json
  *
  * Offline mode is triggered by --content-file; upcoming-version detection then
  * additionally needs --manifest-file and --models-file (otherwise the stored
- * upcoming list is preserved as-is).
+ * upcoming list is preserved as-is), and the prerelease cross-check needs
+ * --website-file (otherwise stored prerelease flags are preserved).
  *
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
  * abort, after writing scrape-error.txt. On a new version, writes
@@ -26,8 +28,9 @@
 const fs = require('fs');
 const path = require('path');
 const {
-  parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, mergeData, validateScrape,
-  API_BASE, MANIFEST_PATH, MODELS_PATH,
+  parseUpdates, pickContent, upcomingVersions, attachBuildNumbers,
+  parseWebsiteVersions, mergeData, validateScrape,
+  API_BASE, MANIFEST_PATH, MODELS_PATH, WEBSITE_URL,
 } = require('./lib/scraper');
 
 const UA = 'Mozilla/5.0 (compatible; polestar4-tracker/1.0; +https://github.com/JayBizzle/polestar4-updates)';
@@ -88,6 +91,34 @@ async function getSource() {
   return { content, manifest, models };
 }
 
+/**
+ * Set of officially-listed version labels for the prerelease cross-check, or
+ * null when unavailable (offline with no --website-file, fetch/parse failure,
+ * or a suspiciously empty parse). Never throws — this check is best-effort and
+ * must not abort the run; null makes mergeData preserve existing flags.
+ */
+async function getWebsiteVersions() {
+  const file = arg('--website-file', undefined);
+  try {
+    let html;
+    if (file && typeof file === 'string') {
+      html = fs.readFileSync(file, 'utf8');
+    } else if (arg('--content-file', undefined)) {
+      return null;   // offline source, no website fixture supplied
+    } else {
+      const res = await fetch(WEBSITE_URL, { headers: { 'User-Agent': UA } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      html = await res.text();
+    }
+    const set = parseWebsiteVersions(html);
+    if (!set.size) throw new Error('parsed 0 versions (page shape changed?)');
+    return set;
+  } catch (e) {
+    console.error(`Website prerelease cross-check skipped: ${e.message}`);
+    return null;
+  }
+}
+
 (async () => {
   const dataPath = path.resolve(argValue('--data', path.join(__dirname, 'data.json')));
   const runDate = argValue('--date', todayUTC());
@@ -105,7 +136,9 @@ async function getSource() {
     ? upcomingVersions(source.models, source.manifest.spaceSoftwareVersion)
     : undefined;
 
-  const { data, changed, newVersions, notesChanged } = mergeData(existing, scraped, runDate, upcoming);
+  const websiteVersions = await getWebsiteVersions();
+
+  const { data, changed, newVersions, notesChanged } = mergeData(existing, scraped, runDate, upcoming, websiteVersions);
 
   if (changed && !hasFlag('--dry-run')) {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
@@ -139,6 +172,7 @@ async function getSource() {
 
   const upcomingLabel = (data.meta.upcoming || [])
     .map(u => u.version || `build ${u.internal_version}`).join(', ');
-  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} changed_notes=${changedNotes.join(', ')} versions=${scraped.length} upcoming=${upcomingLabel}`);
+  const prereleaseLabel = data.updates.filter(u => u.prerelease).map(u => u.version).join(', ');
+  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} changed_notes=${changedNotes.join(', ')} prerelease=${prereleaseLabel} versions=${scraped.length} upcoming=${upcomingLabel}`);
   setOutput({ changed, new_versions: newVersions.join(', '), changed_notes: changedNotes.join(', '), commit_message: commitMessage });
 })().catch(e => fail(e.message));
