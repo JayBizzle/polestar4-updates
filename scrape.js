@@ -19,8 +19,9 @@
  *
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
  * abort, after writing scrape-error.txt. On a new version, writes
- * new-version-issue.md. Appends changed/new_versions/commit_message to
- * $GITHUB_OUTPUT when present.
+ * new-version-issue.md; when an existing version's notes change, writes
+ * notes-change.md (a +added/-removed diff). Appends
+ * changed/new_versions/changed_notes/commit_message to $GITHUB_OUTPUT.
  */
 const fs = require('fs');
 const path = require('path');
@@ -104,7 +105,7 @@ async function getSource() {
     ? upcomingVersions(source.models, source.manifest.spaceSoftwareVersion)
     : undefined;
 
-  const { data, changed, newVersions } = mergeData(existing, scraped, runDate, upcoming);
+  const { data, changed, newVersions, notesChanged } = mergeData(existing, scraped, runDate, upcoming);
 
   if (changed && !hasFlag('--dry-run')) {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
@@ -124,8 +125,20 @@ async function getSource() {
       `${preview}\n\n[View the tracker](https://jaybizzle.github.io/polestar4-updates/)\n`);
   }
 
+  // Notes edited on an already-known version: write a +added / -removed diff
+  // for the ntfy push body so the alert says what actually changed.
+  const changedNotes = notesChanged.map(c => c.version);
+  if (notesChanged.length) {
+    const body = notesChanged.map(c => [
+      c.version,
+      ...c.added.map(n => `+ ${n}`),
+      ...c.removed.map(n => `- ${n}`),
+    ].join('\n')).join('\n\n');
+    fs.writeFileSync(path.join(__dirname, 'notes-change.md'), body + '\n');
+  }
+
   const upcomingLabel = (data.meta.upcoming || [])
     .map(u => u.version || `build ${u.internal_version}`).join(', ');
-  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} versions=${scraped.length} upcoming=${upcomingLabel}`);
-  setOutput({ changed, new_versions: newVersions.join(', '), commit_message: commitMessage });
+  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} changed_notes=${changedNotes.join(', ')} versions=${scraped.length} upcoming=${upcomingLabel}`);
+  setOutput({ changed, new_versions: newVersions.join(', '), changed_notes: changedNotes.join(', '), commit_message: commitMessage });
 })().catch(e => fail(e.message));

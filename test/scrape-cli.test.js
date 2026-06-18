@@ -1,4 +1,4 @@
-const { test } = require('node:test');
+const { test, afterEach } = require('node:test');
 const assert = require('node:assert/strict');
 const { execFileSync } = require('node:child_process');
 const fs = require('fs');
@@ -14,6 +14,15 @@ const FIXTURES = [
 function run(args) {
   return execFileSync('node', ['scrape.js', ...args], { encoding: 'utf8', cwd: path.join(__dirname, '..') });
 }
+
+// scrape.js writes these transient artifacts into the repo root; remove them
+// after each test so they neither leak between tests nor get committed.
+afterEach(() => {
+  for (const f of ['new-version-issue.md', 'notes-change.md', 'scrape-error.txt']) {
+    const p = path.join(__dirname, '..', f);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+  }
+});
 
 test('--dry-run against the fixtures reports a change without writing', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
@@ -48,7 +57,10 @@ test('writes merged data, preserves the existing date, stores upcoming', () => {
   assert.ok(fs.existsSync(issueFile), 'new-version-issue.md should be written');
   const issueContent = fs.readFileSync(issueFile, 'utf8');
   assert.match(issueContent, /jaybizzle\.github\.io\/polestar4-updates/);
-  fs.unlinkSync(issueFile);
+  // P4.2.11 existed with stale notes -> its notes changed -> diff file written
+  const notesFile = path.join(__dirname, '..', 'notes-change.md');
+  assert.ok(fs.existsSync(notesFile), 'notes-change.md should be written');
+  assert.match(fs.readFileSync(notesFile, 'utf8'), /^P4\.2\.11\n[-+]/m);
 });
 
 test('content file alone preserves the stored upcoming list', () => {
@@ -81,8 +93,8 @@ test('GITHUB_OUTPUT receives heredoc-formatted changed key', () => {
   });
   const outputContent = fs.readFileSync(outputFile, 'utf8');
   assert.match(outputContent, /changed<<__EOF__\ntrue\n__EOF__/);
-  const issueFile = path.join(__dirname, '..', 'new-version-issue.md');
-  if (fs.existsSync(issueFile)) fs.unlinkSync(issueFile);
+  // P4.2.11's stale notes changed -> surfaced in the changed_notes output
+  assert.match(outputContent, /changed_notes<<__EOF__\nP4\.2\.11\n__EOF__/);
 });
 
 test('--date with no value exits non-zero', () => {

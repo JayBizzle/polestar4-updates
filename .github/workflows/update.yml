@@ -72,7 +72,7 @@ jobs:
           { echo "@$OWNER — a new Polestar 4 software update is live."; echo; cat new-version-issue.md; } > issue-body.md
           gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file issue-body.md --assignee "$OWNER"
 
-      - name: Push notification (ntfy)
+      - name: Push notification — new version (ntfy)
         if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.new_versions != ''
         continue-on-error: true   # a notification outage must not fail the update
         env:
@@ -87,4 +87,21 @@ jobs:
             -H "Tags: bell,car" \
             -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
             -d "Release notes are live. Tap to open the tracker." \
+            "https://ntfy.sh/$NTFY_TOPIC"
+
+      - name: Push notification — changelog edited (ntfy)
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.changed_notes != ''
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          CHANGED_NOTES: ${{ steps.scrape.outputs.changed_notes }}
+        # Fires when an already-known version's notes are edited. Body is the
+        # +added/-removed diff written to notes-change.md by scrape.js.
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC not set — skipping push."; exit 0; fi
+          curl -fsS \
+            -H "Title: Polestar 4 changelog edited: $CHANGED_NOTES" \
+            -H "Tags: memo,car" \
+            -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
+            --data-binary @notes-change.md \
             "https://ntfy.sh/$NTFY_TOPIC"

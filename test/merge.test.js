@@ -30,6 +30,39 @@ test('notes refresh when scraped text differs', () => {
   assert.equal(changed, true);
 });
 
+test('notesChanged reports added/removed lines for an edited existing version', () => {
+  const scraped = [
+    { version: 'P4.2.11', notes: ['old note', 'a new line'] },  // 'a new line' added
+    { version: 'PC4.1.3', notes: [] },                          // 'legacy' removed
+  ];
+  const { notesChanged } = mergeData(base(), scraped, '2026-05-27');
+  const byVersion = Object.fromEntries(notesChanged.map(c => [c.version, c]));
+  assert.deepEqual(byVersion['P4.2.11'], { version: 'P4.2.11', added: ['a new line'], removed: [] });
+  assert.deepEqual(byVersion['PC4.1.3'], { version: 'PC4.1.3', added: [], removed: ['legacy'] });
+});
+
+test('notesChanged excludes new versions and unchanged ones', () => {
+  const scraped = [
+    { version: 'P4.2.12', notes: ['brand new'] },      // new -> newVersions, not notesChanged
+    { version: 'P4.2.11', notes: ['old note'] },       // identical -> not reported
+    { version: 'PC4.1.3', notes: ['legacy'] },         // identical -> not reported
+  ];
+  const { notesChanged, newVersions } = mergeData(base(), scraped, '2026-05-27');
+  assert.deepEqual(newVersions, ['P4.2.12']);
+  assert.deepEqual(notesChanged, []);
+});
+
+test('a pure reorder of notes is not counted as a changelog change', () => {
+  const existing = base();
+  existing.updates[0].notes = ['one', 'two'];
+  const scraped = [
+    { version: 'P4.2.11', notes: ['two', 'one'] },     // same set, different order
+    { version: 'PC4.1.3', notes: ['legacy'] },
+  ];
+  const { notesChanged } = mergeData(existing, scraped, '2026-05-27');
+  assert.deepEqual(notesChanged, []);
+});
+
 test('new version gets the run date and is reported', () => {
   const scraped = [
     { version: 'P4.2.12', notes: ['brand new'] },
