@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Polestar 4 Software Updates</title>
+    <link>https://jaybizzle.github.io/polestar4-updates/</link>
+    <atom:link href="https://jaybizzle.github.io/polestar4-updates/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Unofficial Polestar 4 over-the-air software update tracker — release notes for every version.</description>
+    <language>en-GB</language>
+    <lastBuildDate>Mon, 22 Jun 2026 00:00:00 GMT</lastBuildDate>
+    <generator>polestar4-updates build.js</generator>
+    <item>
+      <title>Polestar 4 P4.2.13</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.13</guid>
+      <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>The Creep drive setting is now saved to corresponding driver profiles</li><li>Improvements to the automatic resume of stop &amp; go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds</li><li>Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive</li><li>Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance</li><li>Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts</li><li>Improvements to the seatbelt reminder functionality. The seatbelt reminder provides visual and audible alerts when an occupant is unbuckled, particularly at low speeds <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>[pre-release] Polestar 4 P4.2.14</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.14</guid>
+      <pubDate>Wed, 17 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>The Creep drive setting is now saved to corresponding driver profiles <em>(market-specific)</em></li><li>Improvements to the automatic resume of stop &amp; go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds <em>(market-specific)</em></li><li>Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive <em>(market-specific)</em></li><li>Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance <em>(market-specific)</em></li><li>Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.11</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.11</guid>
+      <pubDate>Tue, 24 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>This software update provides general improvements and compatibility updates. It includes the software content released in all previous updates.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.10</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.10</guid>
+      <pubDate>Tue, 24 Feb 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Improvements to battery pre-conditioning, including the system now acting more dynamically, allowing the conditioning to start earlier and reach a higher temperature improving overall charging performance</li><li>To start the pre-conditioning it is required to set a DC fast charger (&gt;70 kW) as the destination in the built-in Google Maps app and ensure the estimated state of charge when arriving is kept above 7%</li><li>On long trips with multiple stops, ensure that the charging stop is prioritized and your first stop in the route guidance</li><li>Improvements to the climate system, including a bug fix when the climate system was sporadically blowing cold air</li><li>ADAS improvements</li><li>Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on parallel roads</li><li>This also includes improvements to mitigate scenarios where the Road Sign Information showed speed limits in mph <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.9</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.9</guid>
+      <pubDate>Mon, 02 Feb 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Plug &amp; Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug &amp; Charge supported stations without the need for manual payment, using the secure ISO 15118 standard for communication between the car and charger. Simply find charging stations that support Plug &amp; Charge through Google Maps in the centre display or in the Polestar Charge app <em>(market-specific)</em></li><li>Activation instructions of Plug &amp; Charge are available in the Polestar App and in the car’s centre display in the Charging menu <em>(market-specific)</em></li><li>Audible confirmation when locking the vehicle is introduced. After installation the function is set to ‘off’ as a default and can be turned on by users in the exterior settings for locking</li><li>Improvements on seat heating function when using APP <em>(market-specific)</em></li><li>Improvements on the steering wheel heating <em>(market-specific)</em></li><li>Wiper service position can now be activated without having to deactivate the automatic wipers. The vehicle is required to be in PARK to activate service position <em>(market-specific)</em></li><li>Rear auto brake for static objects during parking manoeuvres is introduced. A button is added in the camera view to disable it, and the function will remain disabled until re-activated by user</li><li>Enabling Digital key functionality for Apple devices <em>(market-specific)</em></li><li>To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is released at a later date <em>(market-specific)</em></li><li>Lane change assist now saves the preferred setting between driving cycles</li><li>Previously, it was default off each driving cycle</li><li>Automatic resume of stop &amp; go when using Pilot assist or Adaptive Cruise Control now cancels the assisted driving after more than 10 seconds of being at a complete standstill</li><li>Automatic headlight functionality now ensures the headlights turn off automatically when the vehicle transitions from active to inactive mode when the driver’s door is opened</li><li>Previously, the headlights remained turned on until the car was locked or the home safety lights cycle was completed (if the setting was activated)</li><li>The headlights will now turn on again to complete the home safety lights cycle if the setting is activated</li><li>Improvements to the infotainment system including translation corrections and minor UX/UI updates such as digital key for Apple watch will now be displayed with a watch symbol in the shared keys list in-car</li><li>Previously, a shared key for Apple Watch was displayed with a phone symbol</li><li>Improvement to the Google maps energy estimation to reflect a more realistic estimated state of charge at arrival using dynamic consumption data</li><li>Previously, the estimation was calculated based on static consumption data</li><li>Improvement to Apple CarPlay including a bug fix for when Siri was interrupted while replying to text messages</li><li>Improvements to the climate settings including a bug fix for when it wasn’t possible to adjust the air vents in the climate settings</li><li>Improvements to syncing settings between the Polestar app and the car</li><li>Improvements to heating of the area for forward looking cameras in the windscreen, including heating of this area to start, if needed, also when pre-conditioning the car</li><li>The heating starts when the ambient temperature is below 1°C/33°F</li><li>Improvements to the alarm internal movement sensor, including improved sensitivity</li><li>Bug fix for when the steering wheel heating didn’t start in colder climates with the automatic steering wheel heat setting activated</li><li>The steering wheel heat starts when the ambient temperature is below 10°C/50°F</li><li>Bug fix for when the steering wheel could create sporadic vibrations in low-speed manoeuvres</li><li>Should you experience some functions not being available during the first drive cycle after successful installation of this software version, we recommend you restart the infotainment system</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.8</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.8</guid>
+      <pubDate>Thu, 11 Dec 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>The content of this software update is identical to P4.2.7.</li><li>Bug fix for when TMAP was not showing the map in the driver display unless a navigation route was active <em>(market-specific)</em></li><li>Compatibility update</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.7</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.7</guid>
+      <pubDate>Mon, 27 Oct 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Bug fix for issue where old text messages were reiterated when phone is connecting to Bluetooth</li><li>Centre display stability improvements covering translation corrections</li><li>General stability improvements <em>(market-specific)</em></li><li>Video streaming services improvements including mitigation of video signals causing sound to play without picture</li><li>Seat heating improvement to increase the overall seat heating temperature by 2 degrees when someone is seated <em>(market-specific)</em></li><li>Seat heating improvement to increase the overall seat heating temperature by 2 degrees</li><li>Animal mode now automatically turns off headlights when activated. The headlights will return to chosen setting once animal mode is turned off</li><li>Set climate timers will now start 30 minutes prior set departure time</li><li>Previously the timer started 15 minutes prior set time. Should the user not enter the vehicle at set departure time, the climate will continue to run for an additional 10 minutes before turning off</li><li>Pre-conditioning the cabin climate via direct start in the Polestar app will now run for 30 minutes before switching off</li><li>Previously, the climate ran for 15 minutes after direct start</li><li>Dashcam settings are now saved to driver profiles</li><li>Your preferred settings will now be saved to your driver profile, allowing the user to accept the privacy preference at first time of use only. All settings, including automatic emergency recording, will now remain between drive cycles</li><li>The guest profile will always restore to default settings between drive cycles as well as require an acceptance of the privacy preference at every use</li><li>While parked, if the driver’s door is left open and no driver is detected in the seat, any music currently playing will pause</li><li>Previously, music continued to play until the vehicle was locked</li><li>Improved steering interactions in low speed when using Pilot assist</li><li>Improved braking interactions when using Adaptive Cruise Control (ACC) and Pilot assist</li><li>Long press of adjustment to set target speed value is improved to provide a slower reaction. This makes it easier to change the target speed per 1 km/h and improves the overall usage of assisted driving. A short press will remain with increase/decrease of set target speed by 5 km/h</li><li>Adjustment of set target speed value by short press is changed to 1 mph per press. Previously a short press would adjust the target speed by 5 mph. This has now been changed to be adjusted by a long press <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.6</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.6</guid>
+      <pubDate>Mon, 01 Sep 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Bug fix for issue where Adaptive Cruise Control would deactivate in trailer mode.</li><li>Improvement to issue with steering wheel vibrations occurring whilst driving at low speeds.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.5</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.5</guid>
+      <pubDate>Wed, 09 Jul 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Center display stability improvements</li><li>Edit button now added to the Favorites app and Shortcuts widget</li><li>Previously, the widget could only be edited by holding and pressing the app or shortcut you wish to edit. An edit button has now been added to the top right corner of the widget.</li><li>Speed limit warning turned off. Function now includes a dismiss button to allow the driver to actively dismiss the notification</li><li>A/C climate calibration improvements</li><li>Digital Key pairing improvements <em>(market-specific)</em></li><li>Parking sensors are now deactivated when Car Wash Mode is active</li><li>General stability improvements</li><li>Pilot Assist now uses a new AI-based method for lateral control, following the drive path within the lane instead of just the center. The steering control will now handle road curves in a more natural manner.</li><li>This does not reduce the driver&apos;s responsibility to operate the car as safely as possible.</li><li>Lane Keeping Aid now improved to allow setting for steering wheel vibrations only</li><li>Previously the Lane keeping aid system would only allow for an ON or OFF setting, the ON setting would allow both steering interventions and vibrations. You can now select if you want ‘only vibrations’ or ‘vibrations and steering interventions’ when selecting ON. Please note that the steering interventions will still be active for solid road lines and edges.</li><li>Pilot Assist now works up to 150 km/h. If speed exceeds 150 km/h while using Pilot Assist, lateral control will automatically resume when speed drops below 150 km/h again</li><li>Adaptive Cruise Control (ACC) now works up to 180 km/h</li><li>Tuning improvements to ACC and Pilot Assist to provide a smoother acceleration and braking experience</li><li>Pilot Assist improved to avoid unnecessary brake interventions while driving.</li><li>“Driver Not Detected” warnings system improved to reduce amount of false messages</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.4</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.4</guid>
+      <pubDate>Mon, 09 Jun 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Launch of dozen new apps through Google Built-in, all which can be enjoyed while the vehicle is parked. Check out the full list of apps on the Google Play Store.</li><li>Driver’s profile will now be selected when opening the driver’s door, even in the scenario where the passenger door has already been unlocked and opened by another key. The driver’s profile needs to have a key already connected for this to function.</li><li>Previously the vehicle would always default to whichever profile’s key opened the car first, not to the driver entering the car.</li><li>More functions have now been added to the favorite&apos;s shortcut</li><li>Optimize the control performance of remote and scheduled air conditioning <em>(market-specific)</em></li><li>Optimize the control logic of remote steering wheel heating function <em>(market-specific)</em></li><li>Optimize the smoothness during reversing <em>(market-specific)</em></li><li>General stability improvements</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.3</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.3</guid>
+      <pubDate>Fri, 23 May 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Enabling Digital Key functionality for Apple devices for all markets.</li><li>To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is being released for respective markets at a later date.</li><li>Charging speed now shown as kW in driver display.</li><li>Automatic climate mode improved to avoid issue with air conditioning not cooling car sufficiently.</li><li>Centre display stability improvements to prevent unresponsive behaviour or screen resetting.</li><li>Apple CarPlay stability improvements to avoid echo during phone calls in car, as well as connectivity issues between car and phone device.</li><li>Scheduled charging improved resolving issue with timer not setting or charging not starting at set time.</li><li>Digital key improved to prevent issue with centre display settings not correctly showing successfully paired and shared digital keys.</li><li>Favourite shortcuts in centre display improved to prevent issue with loss of saved shortcuts.</li><li>Software release notes now available in centre display.</li><li>Journey Log app enabled. The Journey Log app can be downloaded from Google Play Store and helps drivers automatically track and record trips.</li><li>Dashcam app now available (requires micro-SD card).</li><li>The car will not allow the video stream to be active while driving, however the functions “Record video” and “Take photo” can still be utilized while driving.</li><li>Additional improvements:</li><li>Seat heating stability improvement.</li><li>Charge limit stability improvement to issue with limit unexpectedly changing to 50%.</li><li>Adaptive Cruise Control is now activated by pressing the steering wheel button once. For cars with pilot pack, Adaptive Cruise Control will be activated with one press after activating Pilot Assist. You can toggle between the two functions by pressing the button once.</li><li>Adaptive Cruise Control was previously activated by quickly pressing the Pilot Assist button twice in succession. This has now been removed.</li><li>Pilot Assist &amp; Adaptive Cruise Control set to adapt to the speed limit function reinstated.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.2</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.2</guid>
+      <pubDate>Wed, 26 Mar 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Performance of the climate system improved reducing likelihood of condensation on the windows and improve air flow</li><li>Battery pre-conditioning improvements: minimum estimated state-of-charge at arrival now reduced from 22% to 7%. Battery pre-conditioning requires a destination to a DC charger to be set.</li><li>Improvements when toggling between Adaptive Cruise Control and Pilot Assist functions. Your set speed now remains when switching between ACC and PA instead of using the current speed limit as a target speed.</li><li>Introduction of a driver display message alerting you when the driver alert system is temporarily unavailable. This may occur if, for example, you cover parts of your face during driving, and the system cannot detect you.</li><li>It presents a message displayed to the driver that warns when the driver alert system is temporarily unavailable (for example, when part of the face is obscured while driving and the vehicle system cannot detect the user). <em>(market-specific)</em></li><li>Polestar Link device name setting improved, to avoid incomplete display of connected text in the APP connection interface <em>(market-specific)</em></li><li>Navigation display improved, synchronize the navigation reversible lane’s color display on DIM and CSD <em>(market-specific)</em></li><li>Climate system improved to avoid issue with automatic steering wheel heating not activating at low temperatures.</li><li>General stability improvements.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 P4.2.1</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-P4.2.1</guid>
+      <pubDate>Thu, 06 Feb 2025 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Enabling Digital Key functionality for Apple devices; requires future activation email (Only for European vehicles)</li><li>Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only)</li><li>Introduction of battery preconditioning, applicable when destination to a DC charger is set and the estimated state-of-charge at arrival is above 22%</li><li>Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on the steering wheel control</li><li>Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control</li><li>Adaptive Cruise Control now available with trailer mode</li><li>One pedal drive available in three levels (standard, low, off) via steering wheel controls</li><li>One pedal drive setting now saved to corresponding driver profiles</li><li>Enabler for future Dashcam in-car app (will require micro-SD card).</li><li>Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed</li><li>Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only). <em>(market-specific)</em></li><li>Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on steering wheel control. <em>(market-specific)</em></li><li>Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control. <em>(market-specific)</em></li><li>One pedal drive setting now saved to corresponding driver profiles. <em>(market-specific)</em></li><li>One pedal drive available in three levels (standard, low, off) via steering wheel controls. <em>(market-specific)</em></li><li>Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed. <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 4.1.11</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-4.1.11</guid>
+      <pubDate>Wed, 27 Nov 2024 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Calibration of regenerative braking.</li><li>General stability improvements.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 4.1.10</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-4.1.10</guid>
+      <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Introducing Apple CarPlay. <em>(market-specific)</em></li><li>Improvements to the infotainment system.</li><li>Stability improvement for navigation.</li><li>Bug fix for turn-by-turn information text on driver display when destination is set in navigation.</li><li>Stability improvements for Car Wash Mode.</li><li>Stability improvements for head-up-display (HUD).</li><li>Enabling option for Lane Change Assist in Pilot Assist menu.</li><li>Improvements to Adaptive Cruise Control.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 4.1.9</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-4.1.9</guid>
+      <pubDate>Wed, 21 Aug 2024 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>General stability improvements.</li><li>Introduction of front seat adjustment on centre display. <em>(market-specific)</em></li><li>Introduction of parking comfort mode. Now vehicle can stay in convenience mode in 30 min after user leave the car by activating parking comfort mode. <em>(market-specific)</em></li><li>Introduction of animal mode. <em>(market-specific)</em></li><li>Introduction of car wash mode. <em>(market-specific)</em></li><li>Stability improvements for infotainment system. <em>(market-specific)</em></li><li>Disclaimer: After over the air update installation is completed, you might get a yellow brake system warning light in the driver display. This indicates that the system needs to do a self-check. Please put the gear in P, open then close the driver door and wait for 90 seconds in the car without pressing any pedals. All the systems checks have now been completed and the yellow warning light should not be displayed. <em>(market-specific)</em></li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 Polestar OS4.1.7</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-Polestar OS4.1.7</guid>
+      <pubDate>Wed, 10 Jul 2024 00:00:00 GMT</pubDate>
+      <description><![CDATA[<ul><li>Introduction of Digital Key (only for Polestar and certain Meizu phones).</li><li>Stability improvements to voice assistant.</li><li>General improvements to the infotainment system, including optimisation of music apps and in-car navigation.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 PC4.1.5</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-PC4.1.5</guid>
+      <description><![CDATA[<ul><li>General improvements to the infotainment system.</li><li>Improvements to cabin climate system.</li><li>Voice assistant optimization.</li><li>General improvements to Pilot Assist performance.</li><li>Optimization of wireless phone charging.</li></ul>]]></description>
+    </item>
+    <item>
+      <title>Polestar 4 PC4.1.3</title>
+      <link>https://jaybizzle.github.io/polestar4-updates/</link>
+      <guid isPermaLink="false">polestar4-PC4.1.3</guid>
+      <description><![CDATA[<ul><li>Improvements to cabin climate system.</li><li>Voice assistant optimization.</li><li>General improvements to the infotainment system.</li></ul>]]></description>
+    </item>
+  </channel>
+</rss>

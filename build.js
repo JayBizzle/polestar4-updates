@@ -14,6 +14,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { buildFeed } = require('./lib/feed');
 
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 const dataLiteral = JSON.stringify(data);
@@ -25,6 +26,7 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Polestar 4 Software Updates — Unofficial Tracker</title>
 <meta name="description" content="Tracking Polestar 4 software updates: release notes, time between releases, average cadence, and the predicted next update.">
+<link rel="alternate" type="application/rss+xml" title="Polestar 4 software updates" href="feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -365,7 +367,8 @@ function render(){
     <p>Version notes sourced from Polestar's official release-notes API
        (the JSON source behind the <a href="https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">manual's software-updates page</a>),
        combining every market. Notes tagged <span class="ms-tag">market-specific</span> are limited to certain markets
-       or vehicle configurations in Polestar's data and may not apply to your car. Unofficial; not affiliated with Polestar.</p>\`;
+       or vehicle configurations in Polestar's data and may not apply to your car. Unofficial; not affiliated with Polestar.</p>
+    <p>Get new updates in your reader: <a href="feed.xml">RSS feed</a>.</p>\`;
 }
 render();
 </script>
@@ -375,3 +378,7 @@ render();
 
 fs.writeFileSync(path.join(__dirname, 'index.html'), html);
 console.log('Wrote index.html (' + html.length + ' bytes) from ' + data.updates.length + ' versions.');
+
+const feed = buildFeed(data);
+fs.writeFileSync(path.join(__dirname, 'feed.xml'), feed);
+console.log('Wrote feed.xml (' + feed.length + ' bytes) from ' + data.updates.length + ' versions.');
