@@ -3,9 +3,9 @@
     "title": "Polestar 4 Software Updates",
     "authoritative_source": "https://support-car-content.polestar.volvo.care/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0",
     "timing_note": "Release dates are approximate (“thereabouts”), not exact day-of-release. A few of the oldest versions have no known date.",
-    "scraped_on": "2026-06-17",
-    "total_versions": 18,
-    "page_version_count": 18,
+    "scraped_on": "2026-06-22",
+    "total_versions": 19,
+    "page_version_count": 19,
     "upcoming": [
       {
         "version": "4.3",
@@ -30,6 +30,21 @@
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
         "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts"
+      ]
+    },
+    {
+      "version": "P4.2.13",
+      "release_date": "2026-06-22",
+      "date_estimated": false,
+      "internal_version": 26150,
+      "prerelease": true,
+      "notes": [
+        "The Creep drive setting is now saved to corresponding driver profiles",
+        "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",
+        "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
+        "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
+        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts",
+        "Improvements to the seatbelt reminder functionality. The seatbelt reminder provides visual and audible alerts when an occupant is unbuckled, particularly at low speeds"
       ]
     },
     {
