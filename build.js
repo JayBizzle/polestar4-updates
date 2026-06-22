@@ -7,8 +7,10 @@
  * When the data is refreshed later, just edit data.json and re-run `node build.js`.
  *
  * Each update has: version, release_date (ISO string or null), date_estimated (bool),
- * notes (array of bullet strings). Dates are approximate. Versions are sorted by
- * version number (which matches chronological order for this product).
+ * notes (array of bullet strings), and optionally market_specific (a subset of
+ * notes limited to certain markets/configs, shown with a "market-specific" tag).
+ * Dates are approximate. Versions are sorted by version number (which matches
+ * chronological order for this product).
  */
 const fs = require('fs');
 const path = require('path');
@@ -149,6 +151,12 @@ const html = `<!DOCTYPE html>
   .notes ul{list-style:none;margin-top:14px}
   .notes li{position:relative;padding-left:18px;margin-bottom:9px;font-size:14.5px;color:#2c2c2a}
   .notes li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+  .ms-tag{
+    display:inline-block;margin-left:8px;padding:1px 8px;border-radius:100px;
+    background:var(--gold-soft);color:var(--gold);font-size:10.5px;font-weight:600;
+    letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;white-space:nowrap;
+    cursor:help;
+  }
 
   /* Footer */
   footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
@@ -332,7 +340,10 @@ function render(){
   };
 
   const html = '<div class="timeline">' + list.map((u,i)=>{
-    const notes = (u.notes||[]).map(n=>\`<li>\${esc(n)}</li>\`).join('');
+    const ms = new Set(u.market_specific||[]);
+    const notes = (u.notes||[]).map(n=>\`<li>\${esc(n)}\${ms.has(n)
+      ? '<span class="ms-tag" title="This note applies only to certain markets or vehicle configurations — it may not apply to your car">market-specific</span>'
+      : ''}</li>\`).join('');
     const pill = u.prerelease
       ? '<span class="pre-pill" title="In Polestar\\'s update API but not yet on the official site">pre-release</span>'
       : (u === m.latestOfficial ? '<span class="latest-pill">latest</span>' : '');
@@ -352,8 +363,9 @@ function render(){
   document.getElementById('footer').innerHTML = \`
     <p><strong>About the dates.</strong> \${esc(DATA.meta.timing_note)}</p>
     <p>Version notes sourced from Polestar's official release-notes API
-       (the JSON source behind the <a href="https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">manual's software-updates page</a>;
-       some notes apply to other markets or hardware variants only). Unofficial; not affiliated with Polestar.</p>\`;
+       (the JSON source behind the <a href="https://www.polestar.com/uk/manual/polestar-4/2025/software-updates/" target="_blank" rel="noopener">manual's software-updates page</a>),
+       combining every market. Notes tagged <span class="ms-tag">market-specific</span> are limited to certain markets
+       or vehicle configurations in Polestar's data and may not apply to your car. Unofficial; not affiliated with Polestar.</p>\`;
 }
 render();
 </script>

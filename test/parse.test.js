@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, parseWebsiteVersions } = require('../lib/scraper');
+const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, parseWebsiteVersions, positiveGates } = require('../lib/scraper');
 
 const content = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-en-GB.json'), 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-manifest.json'), 'utf8'));
@@ -75,6 +75,50 @@ test('general disclaimer segments before the first version are ignored', () => {
     assert.ok(!u.notes.some(n => n.startsWith('Functionality after updating may vary')),
       `${u.version} contains intro disclaimer text`);
   }
+});
+
+test('positiveGates: only bare (non-negated) atoms mean market-specific', () => {
+  // null / "true" / negated-only = broadly applicable -> no positive atoms.
+  assert.deepEqual(positiveGates(null), []);
+  assert.deepEqual(positiveGates('true'), []);
+  assert.deepEqual(positiveGates('!MU32'), []);
+  assert.deepEqual(positiveGates('(!MU13 & !MU32)'), []);
+  // a bare atom restricts the note to specific markets/configs.
+  assert.deepEqual(positiveGates('MU66'), ['MU66']);
+  assert.deepEqual(positiveGates('(MU66 | MU64)'), ['MU66', 'MU64']);
+});
+
+test('market_specific flags only positively-gated notes', () => {
+  // "Introducing Apple CarPlay." is gated to a specific market (MU13); the
+  // rest of 4.1.10 is universal, so it is the lone flagged note.
+  assert.deepEqual(byVersion['4.1.10'].market_specific, ['Introducing Apple CarPlay.']);
+
+  // A negatively-gated ("all markets except…") note is NOT market-specific.
+  const p9 = byVersion['P4.2.9'];
+  const audible = p9.notes.find(n => n.startsWith('Audible confirmation when locking the vehicle'));
+  assert.ok(audible, 'expected the audible-confirmation note in the fixture');
+  assert.ok(!(p9.market_specific || []).includes(audible));
+  // …while its MU-gated companions are flagged.
+  assert.ok(p9.market_specific.includes('Improvements on the steering wheel heating'));
+});
+
+test('versions with only universal notes carry no market_specific field', () => {
+  assert.ok(!('market_specific' in byVersion['P4.2.11']));   // single universal note
+  assert.ok(!('market_specific' in byVersion['PC4.1.3']));
+});
+
+test('market_specific is always a subset of that version notes', () => {
+  for (const u of updates) {
+    for (const n of u.market_specific || []) {
+      assert.ok(u.notes.includes(n), `${u.version}: flagged note not in notes`);
+    }
+  }
+});
+
+test('attachBuildNumbers preserves market_specific', () => {
+  const annotated = attachBuildNumbers(updates, models);
+  const by = Object.fromEntries(annotated.map(u => [u.version, u]));
+  assert.deepEqual(by['4.1.10'].market_specific, ['Introducing Apple CarPlay.']);
 });
 
 test('pickContent finds the en-GB entry and rejects unknown languages', () => {

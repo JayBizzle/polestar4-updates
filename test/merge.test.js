@@ -198,3 +198,26 @@ test('omitted upcoming preserves the stored list without reporting a change', ()
   assert.deepEqual(data.meta.upcoming, [{ version: '4.3', internal_version: 26170 }]);
   assert.equal(changed, false);
 });
+
+test('market_specific is carried from the scrape onto merged versions', () => {
+  const scraped = [
+    { version: 'P4.2.11', notes: ['n1', 'n2'], market_specific: ['n2'] },
+    { version: 'PC4.1.3', notes: ['legacy'] },   // none flagged
+  ];
+  const { data } = mergeData(base(), scraped, '2026-05-27');
+  assert.deepEqual(data.updates.find(u => u.version === 'P4.2.11').market_specific, ['n2']);
+  assert.ok(!('market_specific' in data.updates.find(u => u.version === 'PC4.1.3')));
+});
+
+test('a market_specific flip alone marks the file changed', () => {
+  // baseline run: notes match, nothing flagged -> no-op
+  const first = mergeData(base(), NOOP_SCRAPE, '2026-05-27');
+  assert.equal(first.changed, false);
+  // same notes, but a note becomes market-specific -> must churn the file
+  const flagged = [
+    { version: 'P4.2.11', notes: ['old note'], market_specific: ['old note'] },
+    { version: 'PC4.1.3', notes: ['legacy'] },
+  ];
+  const { changed } = mergeData(first.data, flagged, '2026-05-28');
+  assert.equal(changed, true);
+});

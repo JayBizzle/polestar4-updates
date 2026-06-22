@@ -30,6 +30,13 @@
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
         "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts"
+      ],
+      "market_specific": [
+        "The Creep drive setting is now saved to corresponding driver profiles",
+        "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",
+        "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
+        "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
+        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts"
       ]
     },
     {
@@ -43,6 +50,9 @@
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
         "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts",
+        "Improvements to the seatbelt reminder functionality. The seatbelt reminder provides visual and audible alerts when an occupant is unbuckled, particularly at low speeds"
+      ],
+      "market_specific": [
         "Improvements to the seatbelt reminder functionality. The seatbelt reminder provides visual and audible alerts when an occupant is unbuckled, particularly at low speeds"
       ]
     },
@@ -67,6 +77,9 @@
         "Improvements to the climate system, including a bug fix when the climate system was sporadically blowing cold air",
         "ADAS improvements",
         "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on parallel roads",
+        "This also includes improvements to mitigate scenarios where the Road Sign Information showed speed limits in mph"
+      ],
+      "market_specific": [
         "This also includes improvements to mitigate scenarios where the Road Sign Information showed speed limits in mph"
       ]
     },
@@ -105,6 +118,15 @@
         "The steering wheel heat starts when the ambient temperature is below 10°C/50°F",
         "Bug fix for when the steering wheel could create sporadic vibrations in low-speed manoeuvres",
         "Should you experience some functions not being available during the first drive cycle after successful installation of this software version, we recommend you restart the infotainment system"
+      ],
+      "market_specific": [
+        "Plug & Charge is introduced. This functionality automatically authenticates, authorizes, and starts charging at Plug & Charge supported stations without the need for manual payment, using the secure ISO 15118 standard for communication between the car and charger. Simply find charging stations that support Plug & Charge through Google Maps in the centre display or in the Polestar Charge app",
+        "Activation instructions of Plug & Charge are available in the Polestar App and in the car’s centre display in the Charging menu",
+        "Improvements on seat heating function when using APP",
+        "Improvements on the steering wheel heating",
+        "Wiper service position can now be activated without having to deactivate the automatic wipers. The vehicle is required to be in PARK to activate service position",
+        "Enabling Digital key functionality for Apple devices",
+        "To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is released at a later date"
       ]
     },
     {
@@ -116,6 +138,9 @@
         "The content of this software update is identical to P4.2.7.",
         "Bug fix for when TMAP was not showing the map in the driver display unless a navigation route was active",
         "Compatibility update"
+      ],
+      "market_specific": [
+        "Bug fix for when TMAP was not showing the map in the driver display unless a navigation route was active"
       ]
     },
     {
@@ -143,6 +168,11 @@
         "Improved steering interactions in low speed when using Pilot assist",
         "Improved braking interactions when using Adaptive Cruise Control (ACC) and Pilot assist",
         "Long press of adjustment to set target speed value is improved to provide a slower reaction. This makes it easier to change the target speed per 1 km/h and improves the overall usage of assisted driving. A short press will remain with increase/decrease of set target speed by 5 km/h",
+        "Adjustment of set target speed value by short press is changed to 1 mph per press. Previously a short press would adjust the target speed by 5 mph. This has now been changed to be adjusted by a long press"
+      ],
+      "market_specific": [
+        "General stability improvements",
+        "Seat heating improvement to increase the overall seat heating temperature by 2 degrees when someone is seated",
         "Adjustment of set target speed value by short press is changed to 1 mph per press. Previously a short press would adjust the target speed by 5 mph. This has now been changed to be adjusted by a long press"
       ]
     },
@@ -179,6 +209,9 @@
         "Tuning improvements to ACC and Pilot Assist to provide a smoother acceleration and braking experience",
         "Pilot Assist improved to avoid unnecessary brake interventions while driving.",
         "“Driver Not Detected” warnings system improved to reduce amount of false messages"
+      ],
+      "market_specific": [
+        "Digital Key pairing improvements"
       ]
     },
     {
@@ -195,6 +228,11 @@
         "Optimize the control logic of remote steering wheel heating function",
         "Optimize the smoothness during reversing",
         "General stability improvements"
+      ],
+      "market_specific": [
+        "Optimize the control performance of remote and scheduled air conditioning",
+        "Optimize the control logic of remote steering wheel heating function",
+        "Optimize the smoothness during reversing"
       ]
     },
     {
@@ -239,6 +277,11 @@
         "Navigation display improved, synchronize the navigation reversible lane’s color display on DIM and CSD",
         "Climate system improved to avoid issue with automatic steering wheel heating not activating at low temperatures.",
         "General stability improvements."
+      ],
+      "market_specific": [
+        "It presents a message displayed to the driver that warns when the driver alert system is temporarily unavailable (for example, when part of the face is obscured while driving and the vehicle system cannot detect the user).",
+        "Polestar Link device name setting improved, to avoid incomplete display of connected text in the APP connection interface",
+        "Navigation display improved, synchronize the navigation reversible lane’s color display on DIM and CSD"
       ]
     },
     {
@@ -257,6 +300,14 @@
         "One pedal drive setting now saved to corresponding driver profiles",
         "Enabler for future Dashcam in-car app (will require micro-SD card).",
         "Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed",
+        "Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only).",
+        "Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on steering wheel control.",
+        "Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control.",
+        "One pedal drive setting now saved to corresponding driver profiles.",
+        "One pedal drive available in three levels (standard, low, off) via steering wheel controls.",
+        "Sound notification when switching off Pilot Assist or Adaptive Cruise Control removed."
+      ],
+      "market_specific": [
         "Improved charging behaviour: the vehicle will release the charging cable for 90 seconds when the vehicle is unlocked, and the charging limit has not yet been reached (AC charging only).",
         "Enabling switch from Pilot Assist to Adaptive Cruise Control by double clicking on steering wheel control.",
         "Improved behaviour for Lane Keeping Aid, Pilot Assist and Adaptive Cruise Control.",
@@ -289,6 +340,9 @@
         "Stability improvements for head-up-display (HUD).",
         "Enabling option for Lane Change Assist in Pilot Assist menu.",
         "Improvements to Adaptive Cruise Control."
+      ],
+      "market_specific": [
+        "Introducing Apple CarPlay."
       ]
     },
     {
@@ -297,6 +351,14 @@
       "date_estimated": false,
       "notes": [
         "General stability improvements.",
+        "Introduction of front seat adjustment on centre display.",
+        "Introduction of parking comfort mode. Now vehicle can stay in convenience mode in 30 min after user leave the car by activating parking comfort mode.",
+        "Introduction of animal mode.",
+        "Introduction of car wash mode.",
+        "Stability improvements for infotainment system.",
+        "Disclaimer: After over the air update installation is completed, you might get a yellow brake system warning light in the driver display. This indicates that the system needs to do a self-check. Please put the gear in P, open then close the driver door and wait for 90 seconds in the car without pressing any pedals. All the systems checks have now been completed and the yellow warning light should not be displayed."
+      ],
+      "market_specific": [
         "Introduction of front seat adjustment on centre display.",
         "Introduction of parking comfort mode. Now vehicle can stay in convenience mode in 30 min after user leave the car by activating parking comfort mode.",
         "Introduction of animal mode.",
