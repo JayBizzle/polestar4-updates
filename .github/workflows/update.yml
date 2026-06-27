@@ -44,6 +44,21 @@ jobs:
             echo "Skipping: a 'scrape looks broken' issue is already open."
           fi
 
+      - name: Resolve broken-scrape alert on recovery
+        if: steps.scrape.outcome == 'success'
+        continue-on-error: true   # housekeeping must not fail an otherwise-good update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # The scrape recovered — auto-close any open "looks broken" alert so the
+        # dedup guard in "Report broken scrape" can fire again on a future outage.
+        run: |
+          gh issue list --state open --search '"scrape looks broken" in:title' --json number --jq '.[].number' \
+          | while read -r n; do
+              [ -z "$n" ] && continue
+              gh issue close "$n" --reason completed \
+                --comment "✅ Scrape recovered on $(date -u +%F) (run [\`$GITHUB_RUN_ID\`]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)). Auto-closing — the previous failure was transient."
+            done
+
       - name: Fail the run if scrape broke
         if: steps.scrape.outcome == 'failure'
         run: exit 1
