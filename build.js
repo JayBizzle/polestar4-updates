@@ -160,6 +160,33 @@ const html = `<!DOCTYPE html>
     cursor:help;
   }
 
+  /* Search */
+  .search{
+    display:flex;align-items:center;gap:10px;margin:0 2px 12px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0 14px;transition:border-color .15s ease;
+  }
+  .search:focus-within{border-color:var(--gold)}
+  .search svg{flex:none;width:16px;height:16px;color:var(--muted)}
+  .search input{
+    flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:15px;
+    color:var(--ink);padding:13px 0;outline:none;
+  }
+  .search input::placeholder{color:var(--muted)}
+  .search input::-webkit-search-cancel-button{-webkit-appearance:none}
+  .search-clear{
+    flex:none;border:0;background:transparent;color:var(--muted);font:inherit;
+    font-size:13px;font-weight:500;cursor:pointer;padding:6px 2px;
+  }
+  .search-clear:hover{color:var(--ink)}
+  .search-status{font-size:12.5px;color:var(--muted);margin:-4px 2px 18px}
+  mark{background:var(--gold-soft);color:inherit;border-radius:3px;padding:0 1px}
+  .empty{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 22px;text-align:center;color:var(--muted);font-size:14px;
+  }
+  .empty strong{color:var(--ink);font-weight:600}
+
   /* Footer */
   footer{margin-top:54px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
   footer p{margin-bottom:8px;max-width:70ch}
@@ -195,7 +222,13 @@ const html = `<!DOCTYPE html>
     <h2>Release timeline</h2>
     <span class="note" id="timeline-note"></span>
   </div>
-  <p class="tl-legend"><span class="gap">+N&nbsp;days</span> = days since the previous release</p>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search release notes" placeholder="Search release notes — try “Park Assist”, “charging”, “4.2.11”">
+    <button id="search-clear" class="search-clear" type="button" hidden>Clear</button>
+  </div>
+  <p class="search-status" id="search-status" hidden></p>
+  <p class="tl-legend" id="tl-legend"><span class="gap">+N&nbsp;days</span> = days since the previous release</p>
   <div id="timeline-root"></div>
 
   <footer id="footer"></footer>
@@ -325,7 +358,8 @@ function render(){
     (m.prereleases.length ? ' · ' + m.prereleases.length + ' pre-release' : '') +
     ' · ' + m.unknownCount + ' undated';
 
-  // gap = days from the next-older DATED entry in the displayed list
+  // gap = days from the next-older DATED entry in the FULL list (kept stable
+  // even when search hides some entries, so "+N days" stays meaningful)
   const list = m.ups;
   const olderDated = (i) => { for(let j=i+1;j<list.length;j++){ if(list[j].d) return list[j]; } return null; };
   const gapLabel = (u, older) => {
@@ -341,26 +375,82 @@ function render(){
     return \`<span class="date">\${fmt(u.d)}</span>\`;
   };
 
-  const html = '<div class="timeline">' + list.map((u,i)=>{
-    const ms = new Set(u.market_specific||[]);
-    const notes = (u.notes||[]).map(n=>\`<li>\${esc(n)}\${ms.has(n)
-      ? '<span class="ms-tag" title="This note applies only to certain markets or vehicle configurations — it may not apply to your car">market-specific</span>'
-      : ''}</li>\`).join('');
-    const pill = u.prerelease
-      ? '<span class="pre-pill" title="In Polestar\\'s update API but not yet on the official site">pre-release</span>'
-      : (u === m.latestOfficial ? '<span class="latest-pill">latest</span>' : '');
-    return \`<div class="entry \${u.prerelease?'pre':(u.d?'':'nodate')}">
-      <details>
-        <summary>
-          <span class="ver">\${esc(u.version)}</span>\${pill}
-          <span class="meta-row">\${u.prerelease
-            ? '<span class="date est" title="When this version first appeared in Polestar\\'s update API">found ~'+fmt(u.d)+'</span>'
-            : gapLabel(u, olderDated(i))+dateLabel(u)}<span class="chev">▾</span></span>
-        </summary>
-        <div class="notes">\${u.internal_version ? \`<div class="build-line" title="Internal build number; the week is when the build was created, not the release date">\${buildLabel(u.internal_version)}</div>\` : ''}<ul>\${notes}</ul></div>
-      </details></div>\`;
-  }).join('') + '</div>';
-  document.getElementById('timeline-root').innerHTML = html;
+  // ---- search: match version label + note text; highlight + auto-expand ----
+  // wrap each term occurrence in <mark> on the HTML-escaped text (string ops,
+  // not regex, so user input never needs escaping). terms are lowercased.
+  const mark = (text, terms) => {
+    const safe = esc(text);
+    if(!terms.length) return safe;
+    const lower = safe.toLowerCase();
+    const hits = [];
+    terms.forEach(t => { const tl = esc(t); if(!tl) return;
+      for(let i=lower.indexOf(tl); i!==-1; i=lower.indexOf(tl, i+tl.length)) hits.push([i, i+tl.length]); });
+    if(!hits.length) return safe;
+    hits.sort((a,b)=>a[0]-b[0]);
+    let out='', pos=0;
+    hits.forEach(([s,e])=>{ if(s<pos) return; out += safe.slice(pos,s)+'<mark>'+safe.slice(s,e)+'</mark>'; pos=e; });
+    return out + safe.slice(pos);
+  };
+  const matchesVersion = (u, terms) => {
+    if(!terms.length) return true;
+    const hay = (u.version + ' ' + (u.notes||[]).join(' ')).toLowerCase();
+    return terms.every(t => hay.includes(t));
+  };
+
+  function renderTimeline(q){
+    const terms = q.toLowerCase().split(/\\s+/).filter(Boolean);
+    const active = terms.length > 0;
+    let shown = 0, noteHits = 0;
+    const rows = list.map((u,i)=>{
+      if(active && !matchesVersion(u, terms)) return '';
+      shown++;
+      const ms = new Set(u.market_specific||[]);
+      const notes = (u.notes||[]).map(n=>{
+        if(active && terms.some(t => n.toLowerCase().includes(t))) noteHits++;
+        return \`<li>\${active ? mark(n, terms) : esc(n)}\${ms.has(n)
+          ? '<span class="ms-tag" title="This note applies only to certain markets or vehicle configurations — it may not apply to your car">market-specific</span>'
+          : ''}</li>\`;
+      }).join('');
+      const pill = u.prerelease
+        ? '<span class="pre-pill" title="In Polestar\\'s update API but not yet on the official site">pre-release</span>'
+        : (u === m.latestOfficial ? '<span class="latest-pill">latest</span>' : '');
+      return \`<div class="entry \${u.prerelease?'pre':(u.d?'':'nodate')}">
+        <details\${active ? ' open' : ''}>
+          <summary>
+            <span class="ver">\${active ? mark(u.version, terms) : esc(u.version)}</span>\${pill}
+            <span class="meta-row">\${u.prerelease
+              ? '<span class="date est" title="When this version first appeared in Polestar\\'s update API">found ~'+fmt(u.d)+'</span>'
+              : gapLabel(u, olderDated(i))+dateLabel(u)}<span class="chev">▾</span></span>
+          </summary>
+          <div class="notes">\${u.internal_version ? \`<div class="build-line" title="Internal build number; the week is when the build was created, not the release date">\${buildLabel(u.internal_version)}</div>\` : ''}<ul>\${notes}</ul></div>
+        </details></div>\`;
+    }).join('');
+
+    document.getElementById('timeline-root').innerHTML = (active && !shown)
+      ? \`<div class="empty">No release notes match <strong>“\${esc(q)}”</strong>. Try a feature name like “Park Assist” or “charging”, or a version like “4.2.11”.</div>\`
+      : '<div class="timeline">' + rows + '</div>';
+
+    statusEl.hidden = !active;
+    if(active) statusEl.textContent = shown
+      ? (shown===1?'1 version':shown+' versions') + (noteHits?' · '+(noteHits===1?'1 matching note':noteHits+' matching notes'):'')
+      : 'No matches';
+    legendEl.hidden = active;
+  }
+
+  // ---- search wiring ----
+  const searchEl = document.getElementById('search');
+  const clearEl = document.getElementById('search-clear');
+  const statusEl = document.getElementById('search-status');
+  const legendEl = document.getElementById('tl-legend');
+  const runSearch = () => { const q = searchEl.value.trim(); clearEl.hidden = !q; renderTimeline(q); };
+  searchEl.addEventListener('input', runSearch);
+  clearEl.addEventListener('click', () => { searchEl.value=''; runSearch(); searchEl.focus(); });
+  searchEl.addEventListener('keydown', e => { if(e.key==='Escape' && searchEl.value){ e.preventDefault(); searchEl.value=''; runSearch(); } });
+  document.addEventListener('keydown', e => {
+    const t = document.activeElement;
+    if(e.key==='/' && t!==searchEl && !/^(input|textarea|select)$/i.test((t&&t.tagName)||'')){ e.preventDefault(); searchEl.focus(); }
+  });
+  renderTimeline('');
 
   document.getElementById('footer').innerHTML = \`
     <p><strong>About the dates.</strong> \${esc(DATA.meta.timing_note)}</p>
