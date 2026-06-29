@@ -111,7 +111,7 @@ const html = `<!DOCTYPE html>
   .sec-h{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 22px;gap:12px}
   .sec-h h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--ink)}
   .sec-h .note{font-size:12px;color:var(--muted)}
-  .tl-legend{font-size:12.5px;color:var(--muted);margin:-12px 2px 20px}
+  .tl-legend{font-size:12.5px;color:var(--muted);text-align:right;margin:20px 2px 22px}
   .tl-legend .gap{margin-right:2px}
 
   /* Timeline */
@@ -141,6 +141,12 @@ const html = `<!DOCTYPE html>
   }
   .entry.pre::before{border-color:var(--warn)}
   .banner .sub.pre{color:var(--warn);margin-top:8px}
+  .banner .track{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.5}
+  .banner .track b{color:var(--ink);font-weight:600;white-space:nowrap}
+  .track-k{
+    display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;margin-right:10px;
+  }
   .meta-row{display:flex;align-items:center;gap:14px;margin-left:auto;color:var(--muted);font-size:13px;flex-wrap:wrap}
   .gap{color:var(--gold);font-weight:600}
   .gap.zero{color:var(--muted);font-weight:400}
@@ -292,7 +298,27 @@ function compute(){
   const winStart = new Date(last.d.getTime() + p25*DAY);
   const winEnd = new Date(last.d.getTime() + p75*DAY);
 
+  // out-of-sample backtest of the median-gap method: predict each release (from
+  // the 3rd dated one onward) using only the gaps before it, then compare to when
+  // it actually landed. This scores the exact method the banner headline uses.
+  const errs = [];
+  for(let i=2;i<datedAsc.length;i++){
+    const prior=[];
+    for(let j=1;j<i;j++) prior.push(daysBetween(datedAsc[j-1].d, datedAsc[j].d));
+    const s=[...prior].sort((a,b)=>a-b);
+    const med = s.length%2 ? s[(s.length-1)/2] : Math.round((s[s.length/2-1]+s[s.length/2])/2);
+    const pred = new Date(datedAsc[i-1].d.getTime() + med*DAY);
+    errs.push(daysBetween(pred, datedAsc[i].d));   // signed days: + = landed later than predicted
+  }
+  let track = null;
+  if(errs.length){
+    const abs = errs.map(e=>Math.abs(e)).sort((a,b)=>a-b);
+    const medAbs = abs.length%2 ? abs[(abs.length-1)/2] : Math.round((abs[abs.length/2-1]+abs[abs.length/2])/2);
+    track = {n:errs.length, medAbs};
+  }
+
   return {ups, datedAsc, intervals, avg, median, p25, p75, winStart, winEnd, min:sorted[0], max:sorted[sorted.length-1],
+          track,
           last, sinceLast, predicted, overdue, overdueBy,
           prereleases, latestOfficial,
           datedCount: datedAsc.length, estCount: ups.filter(u=>u.date_estimated).length,
@@ -312,12 +338,17 @@ function render(){
     ? '<div class="sub pre">' + m.prereleases.map(p=>esc(p.version)).join(', ') +
       (m.prereleases.length>1?' are':' is') + ' already pre-releasing — found in Polestar\\'s update API, not yet on the official site.</div>'
     : '';
+  // Track record: how accurate this median-gap method has been, out of sample.
+  const trackNote = m.track
+    ? \`<div class="track" title="Out-of-sample backtest: each past release predicted from the median gap of the releases before it, then compared to when it actually arrived. Polestar's release dates are approximate, so treat this as a ballpark."><span class="track-k">Track record</span>across the last \${m.track.n} updates, releases landed a median of <b>±\${plural(m.track.medAbs,'day')}</b> from this method's estimate</div>\`
+    : '';
   document.getElementById('banner').innerHTML = \`
     <div>
       <div class="label">Predicted next update</div>
       <div class="date \${m.overdue?'overdue':''}">~\${fmt(m.predicted)}</div>
       <div class="sub">\${bannerSub}</div>
       \${preNote}
+      \${trackNote}
     </div>
     <div class="badge \${m.overdue?'overdue':'upcoming'}">
       <span class="dot"></span>\${m.overdue ? '~'+plural(m.overdueBy,'day')+' overdue (est.)' : 'Due in ~'+plural(-m.overdueBy,'day')}
