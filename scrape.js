@@ -22,7 +22,8 @@
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
  * abort, after writing scrape-error.txt. On a new version, writes
  * new-version-issue.md; when an existing version's notes change, writes
- * notes-change.md (a +added/-removed diff). Appends
+ * notes-change.md (a +added/-removed diff). Either event also prepends an
+ * entry to HISTORY.md (kept next to the data file). Appends
  * changed/new_versions/changed_notes/commit_message to $GITHUB_OUTPUT.
  */
 const fs = require('fs');
@@ -32,6 +33,7 @@ const {
   parseWebsiteVersions, mergeData, validateScrape,
   API_BASE, MANIFEST_PATH, MODELS_PATH, WEBSITE_URL,
 } = require('./lib/scraper');
+const { updateHistory } = require('./lib/history');
 
 const UA = 'Mozilla/5.0 (compatible; polestar4-tracker/1.0; +https://github.com/JayBizzle/polestar4-updates)';
 
@@ -159,7 +161,7 @@ async function getWebsiteVersions() {
   }
 
   // Notes edited on an already-known version: write a +added / -removed diff
-  // for the ntfy push body so the alert says what actually changed.
+  // for the ntfy push body and the 📝 issue so the alert says what changed.
   const changedNotes = notesChanged.map(c => c.version);
   if (notesChanged.length) {
     const body = notesChanged.map(c => [
@@ -168,6 +170,15 @@ async function getWebsiteVersions() {
       ...c.removed.map(n => `- ${n}`),
     ].join('\n')).join('\n\n');
     fs.writeFileSync(path.join(__dirname, 'notes-change.md'), body + '\n');
+  }
+
+  // Append-only discovery log. Lives next to the data file so temp-data test
+  // runs stay self-contained (production: repo root, committed by the workflow).
+  if ((newVersions.length || notesChanged.length) && !hasFlag('--dry-run')) {
+    const historyPath = path.join(path.dirname(dataPath), 'HISTORY.md');
+    const existingHistory = fs.existsSync(historyPath) ? fs.readFileSync(historyPath, 'utf8') : null;
+    const newVersionEntries = newVersions.map(v => data.updates.find(u => u.version === v));
+    fs.writeFileSync(historyPath, updateHistory(existingHistory, runDate, newVersionEntries, notesChanged));
   }
 
   const upcomingLabel = (data.meta.upcoming || [])

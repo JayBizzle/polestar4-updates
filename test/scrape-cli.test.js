@@ -38,6 +38,7 @@ test('--dry-run against the fixtures reports a change without writing', () => {
   assert.match(out, /changed=true/);
   assert.match(out, /upcoming=4\.2\.12, 4\.3/);
   assert.equal(fs.readFileSync(dataPath, 'utf8'), before, 'dry-run must not write');
+  assert.ok(!fs.existsSync(path.join(tmp, 'HISTORY.md')), 'dry-run must not write HISTORY.md');
   const issueFile = path.join(__dirname, '..', 'new-version-issue.md');
   if (fs.existsSync(issueFile)) fs.unlinkSync(issueFile);
 });
@@ -62,6 +63,11 @@ test('writes merged data, preserves the existing date, stores upcoming', () => {
   const notesFile = path.join(__dirname, '..', 'notes-change.md');
   assert.ok(fs.existsSync(notesFile), 'notes-change.md should be written');
   assert.match(fs.readFileSync(notesFile, 'utf8'), /^P4\.2\.11\n[-+]/m);
+  // HISTORY.md is written next to the data file: new-version entries + the edit
+  const history = fs.readFileSync(path.join(tmp, 'HISTORY.md'), 'utf8');
+  assert.match(history, /^## 2026-05-27 — New version P4\.2\.10$/m);
+  assert.match(history, /^## 2026-05-27 — Notes edited: P4\.2\.11$/m);
+  assert.match(history, /```diff/);
 });
 
 test('website cross-check flags an API-only version as prerelease', () => {

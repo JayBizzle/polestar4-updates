@@ -71,7 +71,7 @@ jobs:
           node build.js
           git config user.name "polestar4-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json index.html feed.xml
+          git add data.json index.html feed.xml HISTORY.md
           git commit -m "$COMMIT_MESSAGE"
           git push
 
@@ -86,6 +86,26 @@ jobs:
         run: |
           { echo "@$OWNER — a new Polestar 4 software update is live."; echo; cat new-version-issue.md; } > issue-body.md
           gh issue create --title "🔔 New update $NEW_VERSIONS detected" --body-file issue-body.md --assignee "$OWNER"
+
+      - name: Announce changelog edit
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.changed_notes != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANGED_NOTES: ${{ steps.scrape.outputs.changed_notes }}
+        # Files a 📝 issue with the +added/-removed diff from notes-change.md.
+        # Deliberately no @mention/assignee — notes edits are the quiet channel
+        # (the loud, mobile-pushed treatment is reserved for new versions).
+        run: |
+          {
+            echo "Polestar edited the release notes of an already-published version."
+            echo
+            echo '```diff'
+            cat notes-change.md
+            echo '```'
+            echo
+            echo "[View the tracker](https://jaybizzle.github.io/polestar4-updates/)"
+          } > notes-change-issue.md
+          gh issue create --title "📝 Release notes edited: $CHANGED_NOTES ($(date -u +%F))" --body-file notes-change-issue.md
 
       - name: Push notification — new version (ntfy)
         if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.new_versions != ''
