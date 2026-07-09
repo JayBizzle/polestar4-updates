@@ -3,7 +3,7 @@
     "title": "Polestar 4 Software Updates",
     "authoritative_source": "https://support-car-content.polestar.volvo.care/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0",
     "timing_note": "Release dates are approximate (“thereabouts”), not exact day-of-release. A few of the oldest versions have no known date.",
-    "scraped_on": "2026-07-06",
+    "scraped_on": "2026-07-09",
     "total_versions": 19,
     "page_version_count": 19,
     "upcoming": [
@@ -12,11 +12,11 @@
         "internal_version": 26161
       },
       {
-        "version": "4.3",
+        "version": null,
         "internal_version": 26170
       },
       {
-        "version": "0.0.0",
+        "version": null,
         "internal_version": 26300
       }
     ]
@@ -33,14 +33,16 @@
         "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
-        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts"
+        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts",
+        "A state of charge and battery data transmission function is introduced."
       ],
       "market_specific": [
         "The Creep drive setting is now saved to corresponding driver profiles",
         "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
-        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts"
+        "Improvements to Road Sign Information, including a bug fix to prevent the system from reading road signs on nearby railways and viaducts",
+        "A state of charge and battery data transmission function is introduced."
       ]
     },
     {
@@ -50,6 +52,7 @@
       "internal_version": 26150,
       "notes": [
         "The Creep drive setting is now saved to corresponding driver profiles",
+        "Note: The Creep setting is automatically enabled when this software version is installed successfully. During the first drive cycle, you can change the setting if desired. Your preference will be saved and applied going forward.",
         "Improvements to the automatic resume of stop & go when using Pilot Assist or Adaptive Cruise Control. This includes a notification informing the driver the functions must be resumed by either pressing the resume button or lightly depressing the accelerator pedal after being at a standstill for more than 10 seconds",
         "Improvements to the Park Assist, including an audible warning starting at 100 cm distance to objects. At 70 cm distance to the object a 360° camera view is triggered when in Drive",
         "Previously, the audible sensor warning was started at 130 cm distance to the object and triggered the 360° camera view at 50 cm distance",
