@@ -191,6 +191,57 @@ test('prerelease: without websiteVersions, stored flags are preserved and new ve
   assert.equal(changed, true);
 });
 
+test('upcomingChanged reports added, removed and relabelled builds', () => {
+  const existing = base();
+  existing.meta.upcoming = [
+    { version: '4.3', internal_version: 26170 },
+    { version: '0.0.0', internal_version: 26300 },
+  ];
+  const next = [
+    { version: '4.2.15', internal_version: 26161 },   // brand-new build
+    { version: null, internal_version: 26170 },       // 26170 lost its "4.3" label
+    { version: '0.0.0', internal_version: 26300 },    // unchanged
+  ];
+  const { changed, upcomingChanged } = mergeData(existing, NOOP_SCRAPE, '2026-07-06', next);
+  assert.equal(changed, true);
+  assert.deepEqual(upcomingChanged.added, [
+    { version: '4.2.15', internal_version: 26161 },
+    { version: null, internal_version: 26170 },
+  ]);
+  assert.deepEqual(upcomingChanged.removed, [{ version: '4.3', internal_version: 26170 }]);
+});
+
+test('upcomingChanged is empty on an identical or omitted upcoming list', () => {
+  const existing = base();
+  existing.meta.upcoming = [{ version: '4.3', internal_version: 26170 }];
+  const same = mergeData(existing, NOOP_SCRAPE, '2026-05-27', [{ version: '4.3', internal_version: 26170 }]);
+  assert.deepEqual(same.upcomingChanged, { added: [], removed: [] });
+  const omitted = mergeData(existing, NOOP_SCRAPE, '2026-05-27');
+  assert.deepEqual(omitted.upcomingChanged, { added: [], removed: [] });
+});
+
+test('releasedVersions reports a prerelease -> official flip', () => {
+  const existing = base();
+  existing.updates[0].prerelease = true;               // P4.2.11 currently prerelease
+  const site = new Set(['P4.2.11', 'PC4.1.3']);        // ...and now on the public page
+  const { releasedVersions, changed } = mergeData(existing, NOOP_SCRAPE, '2026-05-27', undefined, site);
+  assert.deepEqual(releasedVersions, ['P4.2.11']);
+  assert.equal(changed, true);
+});
+
+test('releasedVersions excludes new versions and is empty without websiteVersions', () => {
+  const existing = base();
+  existing.updates[0].prerelease = true;
+  // no website data -> stored flag preserved, no flip reported
+  const noSite = mergeData(existing, NOOP_SCRAPE, '2026-05-27');
+  assert.deepEqual(noSite.releasedVersions, []);
+  // a brand-new version that is immediately official is a new version, not a flip
+  const scraped = [{ version: 'P4.2.12', notes: ['brand new'] }, ...NOOP_SCRAPE];
+  const withSite = mergeData(base(), scraped, '2026-05-27', undefined, new Set(['P4.2.12', 'P4.2.11', 'PC4.1.3']));
+  assert.deepEqual(withSite.releasedVersions, []);
+  assert.deepEqual(withSite.newVersions, ['P4.2.12']);
+});
+
 test('omitted upcoming preserves the stored list without reporting a change', () => {
   const existing = base();
   existing.meta.upcoming = [{ version: '4.3', internal_version: 26170 }];

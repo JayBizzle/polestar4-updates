@@ -19,7 +19,7 @@ function run(args) {
 // scrape.js writes these transient artifacts into the repo root; remove them
 // after each test so they neither leak between tests nor get committed.
 afterEach(() => {
-  for (const f of ['new-version-issue.md', 'notes-change.md', 'scrape-error.txt']) {
+  for (const f of ['new-version-issue.md', 'notes-change.md', 'upcoming-change.md', 'scrape-error.txt']) {
     const p = path.join(__dirname, '..', f);
     if (fs.existsSync(p)) fs.unlinkSync(p);
   }
@@ -63,6 +63,10 @@ test('writes merged data, preserves the existing date, stores upcoming', () => {
   const notesFile = path.join(__dirname, '..', 'notes-change.md');
   assert.ok(fs.existsSync(notesFile), 'notes-change.md should be written');
   assert.match(fs.readFileSync(notesFile, 'utf8'), /^P4\.2\.11\n[-+]/m);
+  // existing data had no upcoming list -> the fixtures' builds are all additions
+  const upcomingFile = path.join(__dirname, '..', 'upcoming-change.md');
+  assert.ok(fs.existsSync(upcomingFile), 'upcoming-change.md should be written');
+  assert.match(fs.readFileSync(upcomingFile, 'utf8'), /^\+ 4\.2\.12 \(build \d+\)$/m);
   // HISTORY.md is written next to the data file: new-version entries + the edit
   const history = fs.readFileSync(path.join(tmp, 'HISTORY.md'), 'utf8');
   assert.match(history, /^## 2026-05-27 — New version P4\.2\.10$/m);
@@ -90,6 +94,18 @@ test('website cross-check flags an API-only version as prerelease', () => {
   const after = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   assert.equal(after.updates.find(u => u.version === 'P4.2.11').prerelease, true);
   assert.ok(!('prerelease' in after.updates.find(u => u.version === 'PC4.1.3')), 'older listed version is not prerelease');
+});
+
+test('a stored prerelease found on the website is reported as released', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
+  const dataPath = path.join(tmp, 'data.json');
+  // P4.2.11 stored as prerelease; the website fixture lists it -> went official
+  fs.writeFileSync(dataPath, JSON.stringify({
+    meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1 },
+    updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, prerelease: true, notes: ['stale'] }],
+  }));
+  const out = run([...FIXTURES, '--data', dataPath, '--date', '2026-05-27', '--dry-run']);
+  assert.match(out, /released=P4\.2\.11/);
 });
 
 test('content file alone preserves the stored upcoming list', () => {
@@ -124,6 +140,9 @@ test('GITHUB_OUTPUT receives heredoc-formatted changed key', () => {
   assert.match(outputContent, /changed<<__EOF__\ntrue\n__EOF__/);
   // P4.2.11's stale notes changed -> surfaced in the changed_notes output
   assert.match(outputContent, /changed_notes<<__EOF__\nP4\.2\.11\n__EOF__/);
+  // no stored upcoming list -> every fixture build surfaces as an addition
+  assert.match(outputContent, /changed_upcoming<<__EOF__\n\+4\.2\.12, \+4\.3, \+0\.0\.0\n__EOF__/);
+  assert.match(outputContent, /released_versions<<__EOF__\n\n__EOF__/);
 });
 
 test('--date with no value exits non-zero', () => {

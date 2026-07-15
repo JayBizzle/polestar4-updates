@@ -107,6 +107,44 @@ jobs:
           } > notes-change-issue.md
           gh issue create --title "📝 Release notes edited: $CHANGED_NOTES ($(date -u +%F))" --body-file notes-change-issue.md
 
+      - name: Announce prerelease going official
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.released_versions != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASED: ${{ steps.scrape.outputs.released_versions }}
+        # A version we were tracking as a prerelease now appears on the public
+        # manual page — Polestar made it official. Quiet channel (no
+        # mention/assignee): the loud treatment already fired when the version
+        # first appeared in the API.
+        run: |
+          {
+            echo "$RELEASED was tracked as a pre-release and is now listed on Polestar's public manual page — the release is official."
+            echo
+            echo "[View the tracker](https://jaybizzle.github.io/polestar4-updates/)"
+          } > released-issue.md
+          gh issue create --title "🚀 $RELEASED is now official ($(date -u +%F))" --body-file released-issue.md
+
+      - name: Announce upcoming-builds change
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.changed_upcoming != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHANGED_UPCOMING: ${{ steps.scrape.outputs.changed_upcoming }}
+        # The registered-but-unpublished builds list (meta.upcoming, from
+        # available-car-models) changed: a future build appeared, vanished or
+        # was relabelled (e.g. 4.3 losing its name to 4.2.15). Body is the
+        # +added/-removed diff from upcoming-change.md. Quiet channel.
+        run: |
+          {
+            echo "Polestar's registered-but-unpublished builds changed — the early-warning list of updates that have no release notes yet."
+            echo
+            echo '```diff'
+            cat upcoming-change.md
+            echo '```'
+            echo
+            echo "[View the tracker](https://jaybizzle.github.io/polestar4-updates/)"
+          } > upcoming-change-issue.md
+          gh issue create --title "🚧 Upcoming builds changed: $CHANGED_UPCOMING ($(date -u +%F))" --body-file upcoming-change-issue.md
+
       - name: Push notification — new version (ntfy)
         if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.new_versions != ''
         continue-on-error: true   # a notification outage must not fail the update
@@ -139,4 +177,34 @@ jobs:
             -H "Tags: memo,car" \
             -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
             --data-binary @notes-change.md \
+            "https://ntfy.sh/$NTFY_TOPIC"
+
+      - name: Push notification — prerelease went official (ntfy)
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.released_versions != ''
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          RELEASED: ${{ steps.scrape.outputs.released_versions }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC not set — skipping push."; exit 0; fi
+          curl -fsS \
+            -H "Title: Polestar 4 $RELEASED is now official" \
+            -H "Tags: rocket,car" \
+            -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
+            -d "Now listed on the public manual page — the release is official. Tap to open the tracker." \
+            "https://ntfy.sh/$NTFY_TOPIC"
+
+      - name: Push notification — upcoming builds changed (ntfy)
+        if: steps.scrape.outputs.changed == 'true' && steps.scrape.outputs.changed_upcoming != ''
+        continue-on-error: true
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        # Body is the +added/-removed diff written to upcoming-change.md.
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then echo "NTFY_TOPIC not set — skipping push."; exit 0; fi
+          curl -fsS \
+            -H "Title: Polestar 4 upcoming builds changed" \
+            -H "Tags: construction,car" \
+            -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
+            --data-binary @upcoming-change.md \
             "https://ntfy.sh/$NTFY_TOPIC"

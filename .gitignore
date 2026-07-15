@@ -2,4 +2,6 @@ node_modules/
 .DS_Store
 scrape-error.txt
 new-version-issue.md
+notes-change.md
+upcoming-change.md
 docs/

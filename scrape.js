@@ -22,9 +22,11 @@
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
  * abort, after writing scrape-error.txt. On a new version, writes
  * new-version-issue.md; when an existing version's notes change, writes
- * notes-change.md (a +added/-removed diff). Either event also prepends an
- * entry to HISTORY.md (kept next to the data file). Appends
- * changed/new_versions/changed_notes/commit_message to $GITHUB_OUTPUT.
+ * notes-change.md (a +added/-removed diff); when the upcoming-builds list
+ * changes, writes upcoming-change.md (same diff style). New versions and notes
+ * edits also prepend an entry to HISTORY.md (kept next to the data file).
+ * Appends changed/new_versions/changed_notes/released_versions/
+ * changed_upcoming/commit_message to $GITHUB_OUTPUT.
  */
 const fs = require('fs');
 const path = require('path');
@@ -140,7 +142,8 @@ async function getWebsiteVersions() {
 
   const websiteVersions = await getWebsiteVersions();
 
-  const { data, changed, newVersions, notesChanged } = mergeData(existing, scraped, runDate, upcoming, websiteVersions);
+  const { data, changed, newVersions, notesChanged, releasedVersions, upcomingChanged } =
+    mergeData(existing, scraped, runDate, upcoming, websiteVersions);
 
   if (changed && !hasFlag('--dry-run')) {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 2) + '\n');
@@ -172,6 +175,22 @@ async function getWebsiteVersions() {
     fs.writeFileSync(path.join(__dirname, 'notes-change.md'), body + '\n');
   }
 
+  // Upcoming (registered-but-unpublished) builds appeared, vanished or were
+  // relabelled: write a +/- diff for the 🚧 issue and its ntfy push body.
+  const upLabel = u => (u.version ? `${u.version} (build ${u.internal_version})` : `build ${u.internal_version}`);
+  const upcomingDelta = [
+    ...upcomingChanged.added.map(u => `+ ${upLabel(u)}`),
+    ...upcomingChanged.removed.map(u => `- ${upLabel(u)}`),
+  ];
+  if (upcomingDelta.length) {
+    fs.writeFileSync(path.join(__dirname, 'upcoming-change.md'), upcomingDelta.join('\n') + '\n');
+  }
+  // Compact "+4.2.15, -4.3" summary for the issue title / workflow condition.
+  const upcomingSummary = [
+    ...upcomingChanged.added.map(u => `+${u.version || `build ${u.internal_version}`}`),
+    ...upcomingChanged.removed.map(u => `-${u.version || `build ${u.internal_version}`}`),
+  ].join(', ');
+
   // Append-only discovery log. Lives next to the data file so temp-data test
   // runs stay self-contained (production: repo root, committed by the workflow).
   if ((newVersions.length || notesChanged.length) && !hasFlag('--dry-run')) {
@@ -184,6 +203,13 @@ async function getWebsiteVersions() {
   const upcomingLabel = (data.meta.upcoming || [])
     .map(u => u.version || `build ${u.internal_version}`).join(', ');
   const prereleaseLabel = data.updates.filter(u => u.prerelease).map(u => u.version).join(', ');
-  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} changed_notes=${changedNotes.join(', ')} prerelease=${prereleaseLabel} versions=${scraped.length} upcoming=${upcomingLabel}`);
-  setOutput({ changed, new_versions: newVersions.join(', '), changed_notes: changedNotes.join(', '), commit_message: commitMessage });
+  console.log(`changed=${changed} new_versions=${newVersions.join(', ')} changed_notes=${changedNotes.join(', ')} released=${releasedVersions.join(', ')} changed_upcoming=${upcomingSummary} prerelease=${prereleaseLabel} versions=${scraped.length} upcoming=${upcomingLabel}`);
+  setOutput({
+    changed,
+    new_versions: newVersions.join(', '),
+    changed_notes: changedNotes.join(', '),
+    released_versions: releasedVersions.join(', '),
+    changed_upcoming: upcomingSummary,
+    commit_message: commitMessage,
+  });
 })().catch(e => fail(e.message));
