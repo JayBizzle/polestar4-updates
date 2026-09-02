@@ -208,3 +208,30 @@ jobs:
             -H "Click: https://jaybizzle.github.io/polestar4-updates/" \
             --data-binary @upcoming-change.md \
             "https://ntfy.sh/$NTFY_TOPIC"
+
+      - name: Keepalive commit (guard against 60-day cron auto-disable)
+        env:
+          KEEPALIVE_AFTER_DAYS: 30
+        # GitHub disables scheduled workflows after 60 days of repository
+        # inactivity. This tracker only commits when Polestar actually ships
+        # something, so a long quiet spell would silently switch the cron off —
+        # and that failure is invisible, because "no updates for weeks" looks
+        # exactly like "working fine". If nothing has landed for 30 days, push a
+        # no-op commit to reset the clock. A real update earlier in this job
+        # already resets it (the age check then reads 0 and skips), so this only
+        # ever fires during a genuine quiet spell. Deliberately NOT
+        # continue-on-error: if the keepalive stops working we want a red run,
+        # not a silent slide toward the cron being disabled.
+        run: |
+          age_days=$(( ( $(date -u +%s) - $(git log -1 --format=%ct) ) / 86400 ))
+          echo "Days since last commit: $age_days (threshold: $KEEPALIVE_AFTER_DAYS)"
+          if [ "$age_days" -lt "$KEEPALIVE_AFTER_DAYS" ]; then
+            echo "Under threshold — no keepalive needed."
+            exit 0
+          fi
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/keepalive
+          git config user.name "polestar4-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/keepalive
+          git commit -m "Keepalive: no Polestar 4 changes in $age_days days"
+          git push
