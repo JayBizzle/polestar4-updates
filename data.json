@@ -3,23 +3,10 @@
     "title": "Polestar 4 Software Updates",
     "authoritative_source": "https://support-car-content.polestar.volvo.care/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0",
     "timing_note": "Release dates are approximate (“thereabouts”), not exact day-of-release. A few of the oldest versions have no known date.",
-    "scraped_on": "2026-07-09",
+    "scraped_on": "2026-09-11",
     "total_versions": 19,
     "page_version_count": 19,
-    "upcoming": [
-      {
-        "version": "4.2.15",
-        "internal_version": 26161
-      },
-      {
-        "version": null,
-        "internal_version": 26170
-      },
-      {
-        "version": null,
-        "internal_version": 26300
-      }
-    ]
+    "upcoming": []
   },
   "updates": [
     {
