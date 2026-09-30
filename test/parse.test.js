@@ -2,11 +2,16 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, parseWebsiteVersions, positiveGates } = require('../lib/scraper');
+const {
+  parseUpdates, pickContent, upcomingVersions, attachBuildNumbers, parseWebsiteVersions, positiveGates,
+  hasModelBuilds, manualProbeBuilds, manualBuildsToModels,
+} = require('../lib/scraper');
 
 const content = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-en-GB.json'), 'utf8'));
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/release-notes-manifest.json'), 'utf8'));
 const models = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/available-car-models.json'), 'utf8'));
+// USER_MANUAL/814/AT/<build> manifests (trimmed), live 2026-09-30: 26150..26300 + AT/99.0.0 (last)
+const manuals = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/user-manual-builds.json'), 'utf8'));
 const updates = parseUpdates(content);
 const byVersion = Object.fromEntries(updates.map(u => [u.version, u]));
 
@@ -171,4 +176,43 @@ test('upcomingVersions returns registered builds above the published max', () =>
   ]);
   assert.deepEqual(upcomingVersions(models, undefined), []);
   assert.deepEqual(upcomingVersions([], 26120), []);
+});
+
+test('hasModelBuilds treats an empty or model-less feed as no data', () => {
+  assert.equal(hasModelBuilds(models), true);
+  assert.equal(hasModelBuilds([]), false);
+  assert.equal(hasModelBuilds(null), false);
+  assert.equal(hasModelBuilds([{ modelCode: '814', softwareVersions: [] }]), false);
+  assert.equal(hasModelBuilds([{ modelCode: '359', softwareVersions: [{ internalVersion: 1 }] }]), false);
+});
+
+test('manualBuildsToModels maps manuals to the models-feed shape, unlabelling bare build numbers', () => {
+  const m = manualBuildsToModels(manuals);
+  assert.equal(hasModelBuilds(m), true);
+  // AT/99.0.0 duplicates 26161 -> deduped; 26170/26300 report their own number -> no label
+  assert.deepEqual(m[0].softwareVersions, [
+    { internalVersion: 26150, carVersion: '4.2.13' },
+    { internalVersion: 26160, carVersion: '4.2.14' },
+    { internalVersion: 26161, carVersion: '4.2.15' },
+    { internalVersion: 26170 },
+    { internalVersion: 26300 },
+  ]);
+  assert.deepEqual(upcomingVersions(m, 26160), [
+    { version: '4.2.15', internal_version: 26161 },
+    { version: null, internal_version: 26170 },
+    { version: null, internal_version: 26300 },
+  ]);
+  const annotated = attachBuildNumbers([{ version: 'P4.2.14', notes: ['x'] }], m);
+  assert.equal(annotated[0].internal_version, 26160);
+});
+
+test('manualProbeBuilds covers YYWW0-2 from the published week to 12 weeks past the run date', () => {
+  const b = manualProbeBuilds(26160, '2026-09-30');   // ISO week 40 -> probe through week 52
+  assert.equal(b[0], 26160, 'published max first, for its label');
+  for (const want of [26161, 26162, 26170, 26300, 26400, 26520, 26522]) assert.ok(b.includes(want), `${want}`);
+  assert.ok(!b.includes(26163) && !b.includes(26530) && !b.includes(26159));
+  // year rollover: late-December run probes into next year's weeks
+  const r = manualProbeBuilds(26500, '2026-12-20');
+  assert.ok(r.includes(26530) && r.includes(27010) && r.includes(27100));
+  assert.deepEqual(manualProbeBuilds(undefined, '2026-09-30'), []);
 });

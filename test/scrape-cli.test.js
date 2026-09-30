@@ -122,6 +122,38 @@ test('content file alone preserves the stored upcoming list', () => {
   if (fs.existsSync(issueFile)) fs.unlinkSync(issueFile);
 });
 
+const EMPTY_MODELS = [
+  '--content-file', 'test/fixtures/release-notes-en-GB.json',
+  '--manifest-file', 'test/fixtures/release-notes-manifest.json',
+  '--models-file', 'test/fixtures/available-car-models-empty.json',
+];
+
+test('an empty models feed without a fallback preserves the stored upcoming list', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
+  const dataPath = path.join(tmp, 'data.json');
+  const stored = [{ version: '4.2.15', internal_version: 26161 }];
+  fs.writeFileSync(dataPath, JSON.stringify({
+    meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1, upcoming: stored },
+    updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
+  }));
+  const out = run([...EMPTY_MODELS, '--data', dataPath, '--date', '2026-05-27']);
+  assert.match(out, /changed_upcoming= /);
+  assert.deepEqual(JSON.parse(fs.readFileSync(dataPath, 'utf8')).meta.upcoming, stored);
+});
+
+test('an empty models feed falls back to user-manual builds for upcoming', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
+  const dataPath = path.join(tmp, 'data.json');
+  fs.writeFileSync(dataPath, JSON.stringify({
+    meta: { authoritative_source: 'x', scraped_on: '2026-01-01', page_version_count: 17, total_versions: 1 },
+    updates: [{ version: 'P4.2.11', release_date: '2026-03-24', date_estimated: false, notes: ['stale'] }],
+  }));
+  // fixture manifest's published max is 26120 -> every manual build is upcoming
+  const out = run([...EMPTY_MODELS, '--manual-file', 'test/fixtures/user-manual-builds.json',
+    '--data', dataPath, '--date', '2026-05-27', '--dry-run']);
+  assert.match(out, /upcoming=4\.2\.13, 4\.2\.14, 4\.2\.15, build 26170, build 26300$/m);
+});
+
 test('GITHUB_OUTPUT receives heredoc-formatted changed key', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ps4-'));
   const dataPath = path.join(tmp, 'data.json');

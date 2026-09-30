@@ -9,6 +9,8 @@
  *   --content-file <path>  read the en-GB release-notes content JSON from a file (tests/offline)
  *   --manifest-file <path> read the release-notes manifest JSON from a file (tests/offline)
  *   --models-file <path>   read the available-car-models JSON from a file (tests/offline)
+ *   --manual-file <path>   read user-manual manifests (JSON array) from a file (tests/offline),
+ *                          used as the upcoming-builds source when the models feed is empty
  *   --website-file <path>  read the public manual HTML from a file (tests/offline) for the prerelease cross-check
  *   --data <path>          data.json path (default: ./data.json)
  *   --date <YYYY-MM-DD>    run date for new versions (default: today UTC)
@@ -16,7 +18,8 @@
  *
  * Offline mode is triggered by --content-file; upcoming-version detection then
  * additionally needs --manifest-file and --models-file (otherwise the stored
- * upcoming list is preserved as-is), and the prerelease cross-check needs
+ * upcoming list is preserved as-is; an empty models feed also needs
+ * --manual-file), and the prerelease cross-check needs
  * --website-file (otherwise stored prerelease flags are preserved).
  *
  * Exit 0 on success (changed or not). Exit 1 on fetch failure or safety-guard
@@ -33,7 +36,8 @@ const path = require('path');
 const {
   parseUpdates, pickContent, upcomingVersions, attachBuildNumbers,
   parseWebsiteVersions, mergeData, validateScrape,
-  API_BASE, MANIFEST_PATH, MODELS_PATH, WEBSITE_URL,
+  hasModelBuilds, manualProbeBuilds, manualBuildsToModels,
+  API_BASE, MANIFEST_PATH, MODELS_PATH, MANUAL_PATH, WEBSITE_URL,
 } = require('./lib/scraper');
 const { updateHistory } = require('./lib/history');
 
@@ -96,6 +100,37 @@ async function getSource() {
 }
 
 /**
+ * Registered builds (models-feed shape) from the user-manual service, or null
+ * when unavailable. HEAD-probes candidate build numbers (200 = exists, 404 =
+ * not), then GETs only the hits plus AT/99.0.0 for their version labels. Never
+ * throws: null makes mergeData preserve the stored upcoming list.
+ */
+async function getManualBuilds(publishedMax, runDate) {
+  const file = arg('--manual-file', undefined);
+  try {
+    if (file && typeof file === 'string') return manualBuildsToModels(readJson(file));
+    if (arg('--content-file', undefined)) return null;   // offline, no manual fixture
+    const base = argValue('--base-url', API_BASE).replace(/\/$/, '');
+    const candidates = manualProbeBuilds(publishedMax, runDate);
+    const exists = [];
+    for (let i = 0; i < candidates.length; i += 8) {
+      exists.push(...await Promise.all(candidates.slice(i, i + 8).map(async b => {
+        const res = await fetch(base + MANUAL_PATH + b, { method: 'HEAD', headers: { 'User-Agent': UA } });
+        if (res.status === 404) return false;
+        if (!res.ok) throw new Error(`HTTP ${res.status} probing build ${b}`);
+        return true;
+      })));
+    }
+    const hits = candidates.filter((_, i) => exists[i]);
+    const manuals = await Promise.all([...hits, '99.0.0'].map(b => fetchJson(base + MANUAL_PATH + b)));
+    return manualBuildsToModels(manuals);
+  } catch (e) {
+    console.error(`User-manual build probe skipped: ${e.message}`);
+    return null;
+  }
+}
+
+/**
  * Set of officially-listed version labels for the prerelease cross-check, or
  * null when unavailable (offline with no --website-file, fetch/parse failure,
  * or a suspiciously empty parse). Never throws — this check is best-effort and
@@ -134,10 +169,20 @@ async function getWebsiteVersions() {
 
   let scraped = parseUpdates(source.content);
   try { validateScrape(scraped, existing); } catch (e) { return fail(e.message); }
-  if (source.models) scraped = attachBuildNumbers(scraped, source.models);
+  // The models feed has returned [] anonymously since 2026-09-11 (now behind
+  // oauth2). Never read an empty feed as "no builds": fall back to probing the
+  // user-manual service, and if that is unavailable too, leave models null so
+  // the stored upcoming list and build numbers are preserved.
+  let models = source.models;
+  if (models && !hasModelBuilds(models)) {
+    models = source.manifest
+      ? await getManualBuilds(source.manifest.spaceSoftwareVersion, runDate)
+      : null;
+  }
+  if (models) scraped = attachBuildNumbers(scraped, models);
 
-  const upcoming = source.manifest && source.models
-    ? upcomingVersions(source.models, source.manifest.spaceSoftwareVersion)
+  const upcoming = source.manifest && models
+    ? upcomingVersions(models, source.manifest.spaceSoftwareVersion)
     : undefined;
 
   const websiteVersions = await getWebsiteVersions();
