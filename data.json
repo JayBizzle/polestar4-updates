@@ -13,7 +13,6 @@
       "version": "P4.3.0",
       "release_date": "2026-11-03",
       "date_estimated": false,
-      "prerelease": true,
       "notes": [
         "The operating system, Android Automotive OS, is upgraded to Android 15. This includes overall infotainment improvements and performance",
         "Digital key for Google- and Samsung devices is introduced. It will be possible to create a primary digital key on compatible devices once this software update is starting Over-The-Air (OTA) deployments",
