@@ -8,6 +8,53 @@ Entries dated before 2026-07-09 were backfilled from data.json when this log
 was introduced; their dates are the (partly approximated) release dates, not
 scrape-discovery dates.
 
+## 2026-11-03 — New version P4.3.0
+
+- The operating system, Android Automotive OS, is upgraded to Android 15. This includes overall infotainment improvements and performance
+- Digital key for Google- and Samsung devices is introduced. It will be possible to create a primary digital key on compatible devices once this software update is starting Over-The-Air (OTA) deployments
+- To activate digital key, a special code is required. This code will be sent to all primary drivers when the full functionality is being released in each respective market
+- Park assist pilot is introduced in MY26 and MY27 cars equipped with Pilot pack. The Park assist pilot supports the driver with automatic parking in perpendicular parking spots. When driving at low speed after activation of Help me park – Park assist pilot, the function detects available parking slots, and these are shown in camera view on the centre display. The driver can choose the parking spot and activate the automatic parking in the display. The vehicle will then steer and brake without any driver involvement after the function has been activated. The Park assist pilot function operates at low speeds up to 30 Km/h
+- This feature is not available in MY25 due to hardware differences
+- Park assist pilot is unavailable when the towbar is extended
+- Vehicle-to-Load (V2L) is introduced. This enables the possibility to charge another device, such as electrical camping equipment, power tools and a variety of consumer devices, using the vehicle as a power bank. The system speed is up to 3.3 kW (16A, 1-phase, 230V) to power external devices by connecting a V2L adaptor into the vehicle’s charging port. When discharging, the charging indicator will show a blue pulsating colour. Discharging can be achieved until Polestar 4 reaches the selected lower set limit, configured by the user via the centre display charging setting
+- A compatible Vehicle-to-Load (V2L) adaptor is available to purchase in the Polestar Extras web shop
+- Camping mode is introduced to use when camping with Polestar 4. This new mode keeps the car cabin temperature at the preferred level with V2L, USB and 12 V outlets on to power devices while camping in your car. The mode features convenient access to functions and controls such as ambient lighting, media, climate controls and door locks
+- When camping mode is turned on, the centre display and driver display go to sleep after 20 seconds from last interaction. By touching the centre display, they activate again and the timer resets
+- Camping mode automatically turns off when the battery reaches 20% and the windows open to maintain good air quality
+- Valet mode is introduced, offering restricted access to vehicle functions through the centre display. While active, only basic driving adjustments are permitted
+- Additionally, users can set a maximum driving speed and lock the glove box to protect personal belongings
+- Keep climate is added to the general car modes menu. It is now also possible to see the desired timer directly on the Keep climate card
+- Proximity locking is now split into two separate buttons for Approach unlocking and Walk-away locking. This change increases the available preferences for locking and unlocking as they can be set separately according to user preference
+- Keep climate mode now automatically turns off headlights when activated. The headlights will return to chosen setting once Keep climate mode is turned off
+- Dashcam app now includes a button with direct access to the Gallery app. In the Gallery app, it now also includes a button with direct access to the Dashcam app for improved usability
+- Improvements to the Favourite shortcuts and Favourite apps home screen widgets, including additional slots for shortcuts and apps. The widgets now include a total of nine shortcuts and apps on each widget
+- Previously, a total of six shortcuts and apps were available to add to each widget
+- Additional options for selectable shortcuts are also introduced:
+- Car wash mode
+- Keep climate mode
+- Animal mode
+- Camping mode
+- Front defroster
+- Rear defroster, including exterior mirrors
+- Headlights OFF
+- This software update provides overall improvements and compatibility updates. It includes all software content released in previous updates.
+- Bug fix for when an echo was experienced for the receiving end during phone calls via Bluetooth
+- Bug fix for when the towbar wasn't unfolding as expected
+- Bug fix for when the climate system activated cold air during bright sunlight, regardless of ambient temperature
+- Bug fix for when the pre-conditioning would temporarily override the set target cabin temperature
+- Bug fix for when the speedometer was repeatedly toggling between two different speed values in rapid succession
+- Bug fix for when Pilot Assist and Adaptive Cruise Control were active and the speedometer showed 1 km/h below the set speed limit
+- Improvements to digital key, including better performance for key detection when unlocking and locking
+- Improvements to Pilot Assist and Lane Keeping Aid, including general robustness and tuning improvements
+- Improvements to park assist, including sensitivity adjustments and general tuning improvements
+- Improvements to Lane Keeping Aid, including improved tuning for when the driver is overriding the intervention. The steering duration during Run-off Road Mitigation interventions have also been improved
+- Improvements to Rear collision warning and mitigation, including new tuning to reduce warnings being applied too early
+- Improvements to the vehicle start-up, including better performance for when the vehicle displays are starting up after being parked
+- Improvements to the remote vehicle controls via the Polestar App, including better response time between the app and the car
+- Improvement to the Google maps energy estimation, including better accuracy using instant consumption data and accessory parameters, such as load carriers and trailers
+- Improvements to Lane Change Assist, including a change in the logic for activating the function. Now a full pull of the indicator stalk will activate function, while a short pull will temporarily turn off steering assistance and allow for a manual lane change
+- Previously, both a full pull and a short pull activated Lane Change Assist
+
 ## 2026-06-22 — New version P4.2.13
 
 - The Creep drive setting is now saved to corresponding driver profiles
