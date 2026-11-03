@@ -14,6 +14,11 @@ const sample = {
     { version: 'PC4.1.3', release_date: null, date_estimated: false, notes: ['Legacy, undated'] },
   ],
 };
+const regionalSample = {
+  meta: sample.meta,
+  updates: [{ version: 'P4.2.14', release_date: '2026-06-17', date_estimated: false, regional: true,
+    notes: ['Only-this-market note'], market_specific: ['Only-this-market note'] }],
+};
 
 test('buildFeed emits one item per version, newest (by date) first', () => {
   const xml = buildFeed(sample);
@@ -32,6 +37,10 @@ test('prereleases are kept but title-prefixed', () => {
   const xml = buildFeed(sample);
   assert.match(xml, /<title>\[pre-release\] Polestar 4 P4\.2\.14<\/title>/);
   assert.match(xml, /<title>Polestar 4 P4\.2\.13<\/title>/);   // non-prerelease has no prefix
+});
+
+test('regional versions are title-prefixed [regional]', () => {
+  assert.match(buildFeed(regionalSample), /<title>\[regional\] Polestar 4 P4\.2\.14<\/title>/);
 });
 
 test('market-specific notes are marked inline; plain notes are not', () => {

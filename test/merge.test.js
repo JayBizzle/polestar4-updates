@@ -272,3 +272,39 @@ test('a market_specific flip alone marks the file changed', () => {
   const { changed } = mergeData(first.data, flagged, '2026-05-28');
   assert.equal(changed, true);
 });
+
+test('regional: an all-market-specific version absent from the site is regional, not prerelease', () => {
+  const existing = base();
+  existing.updates.unshift({ version: 'P4.2.14', release_date: '2026-06-17', date_estimated: false,
+    prerelease: true, notes: ['gated a', 'gated b'], market_specific: ['gated a', 'gated b'] });
+  const scraped = [
+    { version: 'P4.2.14', notes: ['gated a', 'gated b'], market_specific: ['gated a', 'gated b'] },
+    { version: 'P4.2.13', notes: ['gated a', 'universal'], market_specific: ['gated a'] },   // partly gated, new
+    ...NOOP_SCRAPE,
+  ];
+  const site = new Set(['P4.2.11', 'PC4.1.3']);
+  const { data, changed, releasedVersions } = mergeData(existing, scraped, '2026-11-03', undefined, site);
+  const p14 = data.updates.find(u => u.version === 'P4.2.14');
+  assert.equal(p14.regional, true);
+  assert.ok(!('prerelease' in p14));
+  assert.equal(p14.release_date, '2026-06-17');                    // date still frozen
+  assert.equal(data.updates.find(u => u.version === 'P4.2.13').prerelease, true);   // only partly gated
+  assert.ok(!('regional' in data.updates.find(u => u.version === 'P4.2.13')));
+  assert.deepEqual(releasedVersions, [], 'reclassifying as regional is not "went official"');
+  assert.equal(changed, true);
+});
+
+test('regional: an all-market-specific version that IS on the site is plain official', () => {
+  const scraped = [{ version: 'P4.2.11', notes: ['g'], market_specific: ['g'] }, NOOP_SCRAPE[1]];
+  const { data } = mergeData(base(), scraped, '2026-11-03', undefined, new Set(['P4.2.11', 'PC4.1.3']));
+  const p = data.updates.find(u => u.version === 'P4.2.11');
+  assert.ok(!('regional' in p) && !('prerelease' in p));
+});
+
+test('regional: without websiteVersions a new all-gated version is regional, not prerelease', () => {
+  const scraped = [{ version: 'P4.2.14', notes: ['g'], market_specific: ['g'] }, ...NOOP_SCRAPE];
+  const { data } = mergeData(base(), scraped, '2026-11-03');
+  const p = data.updates.find(u => u.version === 'P4.2.14');
+  assert.equal(p.regional, true);
+  assert.ok(!('prerelease' in p));
+});

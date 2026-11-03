@@ -139,6 +139,11 @@ const html = `<!DOCTYPE html>
     background:var(--warn-soft);color:var(--warn);font-size:11px;font-weight:600;
     letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;
   }
+  .reg-pill{
+    display:inline-block;margin-left:10px;padding:2px 9px;border-radius:100px;
+    background:var(--gold-soft);color:var(--gold);font-size:11px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;vertical-align:middle;cursor:help;
+  }
   .entry.pre::before{border-color:var(--warn)}
   .banner .sub.pre{color:var(--warn);margin-top:8px}
   .meta-row{display:flex;align-items:center;gap:14px;margin-left:auto;color:var(--muted);font-size:13px;flex-wrap:wrap}
@@ -263,12 +268,14 @@ function compute(){
 
   // prereleases: in the API but not yet on Polestar's public site. Excluded
   // from cadence/prediction; the latest OFFICIAL version drives those.
+  // regional releases (one market's twin of a global release, e.g. P4.2.14) are
+  // likewise kept out of cadence and the "latest" pill, so twins don't fake a gap.
   const prereleases = ups.filter(u=>u.prerelease);
-  const latestOfficial = ups.find(u=>!u.prerelease) || ups[0];
+  const latestOfficial = ups.find(u=>!u.prerelease && !u.regional) || ups[0];
 
   // dated official entries, oldest->newest, for cadence (fall back to all dated
   // if somehow nothing official is dated, so the banner never breaks)
-  let datedAsc = [...ups].filter(u=>u.d && !u.prerelease).sort((a,b)=> a.d - b.d);
+  let datedAsc = [...ups].filter(u=>u.d && !u.prerelease && !u.regional).sort((a,b)=> a.d - b.d);
   if(!datedAsc.length) datedAsc = [...ups].filter(u=>u.d).sort((a,b)=> a.d - b.d);
   const intervals = [];
   for(let i=1;i<datedAsc.length;i++) intervals.push(daysBetween(datedAsc[i-1].d, datedAsc[i].d));
@@ -361,7 +368,7 @@ function render(){
   // gap = days from the next-older DATED entry in the FULL list (kept stable
   // even when search hides some entries, so "+N days" stays meaningful)
   const list = m.ups;
-  const olderDated = (i) => { for(let j=i+1;j<list.length;j++){ if(list[j].d) return list[j]; } return null; };
+  const olderDated = (i) => { for(let j=i+1;j<list.length;j++){ const o=list[j]; if(o.d && !o.prerelease && !o.regional) return o; } return null; };
   const gapLabel = (u, older) => {
     if(!u.d) return '';
     if(!older) return '<span class="gap zero" title="Oldest dated release — no earlier one to compare">first dated</span>';
@@ -413,6 +420,8 @@ function render(){
       }).join('');
       const pill = u.prerelease
         ? '<span class="pre-pill" title="In Polestar\\'s update API but not yet on the official site">pre-release</span>'
+        : u.regional
+        ? '<span class="reg-pill" title="Released only for certain markets — every note is market-specific, so it won\\'t appear on the official (UK) page and may not apply to your car">regional</span>'
         : (u === m.latestOfficial ? '<span class="latest-pill">latest</span>' : '');
       return \`<div class="entry \${u.prerelease?'pre':(u.d?'':'nodate')}">
         <details\${active ? ' open' : ''}>
@@ -420,7 +429,7 @@ function render(){
             <span class="ver">\${active ? mark(u.version, terms) : esc(u.version)}</span>\${pill}
             <span class="meta-row">\${u.prerelease
               ? '<span class="date est" title="When this version first appeared in Polestar\\'s update API">found ~'+fmt(u.d)+'</span>'
-              : gapLabel(u, olderDated(i))+dateLabel(u)}<span class="chev">▾</span></span>
+              : (u.regional ? '' : gapLabel(u, olderDated(i)))+dateLabel(u)}<span class="chev">▾</span></span>
           </summary>
           <div class="notes">\${u.internal_version ? \`<div class="build-line" title="Internal build number; the week is when the build was created, not the release date">\${buildLabel(u.internal_version)}</div>\` : ''}<ul>\${notes}</ul></div>
         </details></div>\`;
