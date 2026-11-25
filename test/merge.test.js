@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { mergeData } = require('../lib/scraper');
 
-const API = 'https://support-car-content.polestar.volvo.care/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0';
+const API = 'https://support-car-content-polestar.weu-prod.ecpaz.volvocars.biz/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0';
 
 function base() {
   return {

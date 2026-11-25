@@ -5,7 +5,7 @@
  * (preserving manually-gathered dates), and emit workflow signals.
  *
  * Flags:
- *   --base-url <url>       API origin (default: support-car-content.polestar.volvo.care)
+ *   --base-url <url>       API origin (default: support-car-content-polestar.weu-prod.ecpaz.volvocars.biz)
  *   --content-file <path>  read the en-GB release-notes content JSON from a file (tests/offline)
  *   --manifest-file <path> read the release-notes manifest JSON from a file (tests/offline)
  *   --models-file <path>   read the available-car-models JSON from a file (tests/offline)

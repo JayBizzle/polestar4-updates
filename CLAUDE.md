@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates hourly from Polestar's car-content API (`support-car-content.polestar.volvo.care` — the unauthenticated JSON service behind the manual's release-notes pages and the in-car manual app). Live at https://jaybizzle.github.io/polestar4-updates/.
+An unofficial Polestar 4 software-update tracker. A single static page predicts the next over-the-air update, shows cadence stats, and lists every version's release notes. It auto-updates hourly from Polestar's car-content API (`support-car-content-polestar.weu-prod.ecpaz.volvocars.biz`, formerly `support-car-content.polestar.volvo.care` — the unauthenticated JSON service behind the manual's release-notes pages and the in-car manual app). Live at https://jaybizzle.github.io/polestar4-updates/.
 
 ## Commands
 
@@ -26,6 +26,21 @@ node scrape.js --content-file <f> --data <path> --date 2026-05-27   # determinis
 - Registered builds (including unpublished): `GET /api/car-content/available-car-models` — pairs `internalVersion` (a YYWW-style build number, e.g. `26170`) with `carVersion` (e.g. `4.3`). Builds above `spaceSoftwareVersion` have no notes yet → they become `meta.upcoming` (early warning, surfaces before any release-notes page updates). **Since 2026-09-11 this returns `[]` anonymously** (the spec now marks it `oauth2Security`); an empty feed is never read as "no builds".
 - Fallback build source (used when the models feed is empty): `GET /api/car-content/USER_MANUAL/814/AT/<build>` is 200 for a registered build and 404 otherwise (`HEAD` works), and `AT/99.0.0` resolves to the newest *labelled* build. `carSoftwareVersion` is the label (e.g. `4.2.15`), or the bare build number when unlabelled. `scrape.js` HEAD-probes candidates from `manualProbeBuilds` (every `YYWW0`–`YYWW2` from the published week to 12 weeks past the run date, ~110 requests), GETs only the hits plus `AT/99.0.0`, and `manualBuildsToModels` reshapes them into the models-feed format so `upcomingVersions`/`attachBuildNumbers` work unchanged. If that probe fails too, the stored upcoming list is preserved.
 - The API self-documents at `GET /openapi.json`. It is internal/undocumented — if it breaks, the guard aborts and the workflow files a ⚠️ issue.
+
+### If the API host disappears again
+
+**2026-11-19:** almost the whole `volvo.care` DNS zone was emptied; only `prismedia-files-production.volvo.care` kept a record. The old host `support-car-content.polestar.volvo.care` returned NXDOMAIN, and CI failed with `SCRAPE ABORTED: fetch failed`. The servers themselves stayed up, so the outage was DNS-only; an EX30 owner on r/ex30 saw the same thing on Volvo's `support-car-content.volvo.care`. The host was found again on 2026-11-25 like this:
+
+1. **Confirm it's DNS.** Run `dig @1.1.1.1 +short <host>`, and query the zone's own NS servers too (`dig NS <zone>`). An empty answer plus an SOA means the record was removed, not that the server is down.
+2. **Get the last-known IP from passive DNS.** `curl -s https://otx.alienvault.com/api/v1/indicators/hostname/<host>/passive_dns | jq '.passive_dns[] | {first,last,address}'` (free, no key). The newest record was `108.143.152.223`, shared by all the `support-*content*.volvo.care` hosts.
+3. **Hit that IP with the old hostname.** Run `curl --resolve <host>:443:<ip> https://<host>/api/car-content/SOFTWARE_RELEASE_NOTES/814/UNTIL/99.0.0`. `--resolve` keeps the SNI/Host header, so the TLS certificate (`*.volvo.care`) and routing still work. It returned 200.
+4. **Read the new hostname out of the response.** The manifest's absolute URLs (`assetBundle.url`, `assetBundles[].url`) name the host the service now believes it lives on. That gave `support-car-content-polestar.weu-prod.ecpaz.volvocars.biz`, which resolves publicly and serves the identical paths.
+5. **Verify before switching.** Run `node scrape.js --base-url https://<new-host> --data <temp copy of data.json> --dry-run`, then change `API_BASE` in `lib/scraper.js` (plus `test/merge.test.js`'s `API` and `meta.authoritative_source` in `data.json`).
+
+Other leads, if those steps fail:
+- crt.sh certificate-transparency logs: `https://crt.sh/?q=%25.<domain>&output=json` lists hostnames ever issued.
+- The polestar.com manual (a Remix app) renders on its server, so it never exposes the backend host. Its loader JSON (`<page>?_data=routes%2F%24locale_.manual_.%24model.%24year_.software-updates`) is a notes-only fallback: UK-filtered, with no gating, prereleases or builds.
+- As a last resort, capture the car's own traffic: share a Mac's connection over Wi-Fi to the car and record DNS/TLS SNI with tcpdump/tshark.
 
 ## Architecture
 
